@@ -388,3 +388,39 @@ h3 {
   color: #fde68a;
   font-weight: 800;
 }
+
+.ecosystemPanel {
+  border-color: rgba(232, 121, 249, 0.72);
+  background: rgba(88, 28, 135, 0.16);
+}
+
+.ecosystemGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ecosystemCard {
+  border-color: rgba(232, 121, 249, 0.72);
+}
+
+.ecosystemBoundary {
+  border: 1px solid rgba(250, 204, 21, 0.72);
+  border-radius: 18px;
+  padding: 18px;
+  margin-top: 18px;
+  background: rgba(113, 63, 18, 0.16);
+}
+
+@media (max-width: 1200px) {
+  .ecosystemGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ecosystemGrid {
+    grid-template-columns: 1fr;
+  }
+}

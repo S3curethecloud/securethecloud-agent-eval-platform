@@ -62,3 +62,37 @@ Current boundary:
 - no live autonomous tool execution
 
 The platform may demonstrate simulated agent evaluation workflows and evidence records, but production authority must be granted through the doctrine control plane first.
+
+## SecureTheCloud Ecosystem Fit
+
+SecureTheCloud Agent Evaluation Platform is a lab-safe evaluation surface for testing, scoring, and verifying autonomous AI agents across the SecureTheCloud ecosystem.
+
+It demonstrates how agent outputs, tool calls, RAG grounding, memory behavior, policy decisions, safety failures, regressions, and SOC 2-aligned evidence can be evaluated before and after deployment.
+
+It does not create new suite membership, enforcement authority, runtime authority, SENTINEL bypass behavior, or production agent execution.
+
+### Lifecycle Positioning
+
+| SecureTheCloud Surface | Lifecycle Role |
+|---|---|
+| SecureTheCloud AI Governance Board | Governance before deployment |
+| SecureTheCloud MCP Governance Lab | Governance during tool access |
+| SecureTheCloud AI Runtime Trust Center | Governance after deployment |
+| SecureTheCloud Agent Evaluation Platform | Evaluation across the agent lifecycle |
+
+### Flagship Evaluation Role
+
+The platform is intended to become the evaluation control surface across the SecureTheCloud ecosystem.
+
+It evaluates:
+
+- agent outputs
+- tool calls
+- RAG grounding
+- memory behavior
+- policy decisions
+- safety failures
+- regressions
+- SOC 2-aligned evidence readiness
+
+Current state remains lab-safe and simulated.

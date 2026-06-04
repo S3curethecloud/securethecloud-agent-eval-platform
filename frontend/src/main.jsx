@@ -204,6 +204,43 @@ function App() {
         </div>
       </section>
 
+      <section className="shell ecosystemPanel">
+        <p className="eyebrow">SECURETHECLOUD ECOSYSTEM FIT</p>
+        <h2>Flagship Evaluation Surface Across the Portfolio</h2>
+        <p>
+          SecureTheCloud Agent Evaluation Platform is a lab-safe evaluation surface for testing,
+          scoring, and verifying autonomous AI agents across the SecureTheCloud ecosystem.
+        </p>
+        <p>
+          It demonstrates how agent outputs, tool calls, RAG grounding, memory behavior,
+          policy decisions, safety failures, regressions, and SOC 2-aligned evidence can be
+          evaluated before and after deployment.
+        </p>
+
+        <div className="ecosystemGrid">
+          {[
+            ["AI Governance Board", "Governance before deployment", "Tests whether an agent is safe and compliant before approval."],
+            ["MCP Governance Lab", "Governance during tool access", "Verifies tool-call correctness, forbidden tool blocking, and approval boundaries."],
+            ["Runtime Trust Center", "Governance after deployment", "Evaluates runtime regressions, drift, incidents, and monitoring evidence."],
+            ["Agent Evaluation Platform", "Evaluation across the lifecycle", "Scores agent behavior before and after deployment."]
+          ].map(([name, role, detail]) => (
+            <div className="card ecosystemCard" key={name}>
+              <h3>{name}</h3>
+              <p><b>{role}</b></p>
+              <p>{detail}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="ecosystemBoundary">
+          <h3>Doctrine-Safe Flagship Positioning</h3>
+          <p>
+            This platform does not create new suite membership, enforcement authority,
+            runtime authority, SENTINEL bypass behavior, or production agent execution.
+          </p>
+        </div>
+      </section>
+
       <section className="shell soc2Panel">
         <p className="eyebrow">SOC 2 READINESS</p>
         <h2>SOC 2-Aligned Evidence Posture</h2>
