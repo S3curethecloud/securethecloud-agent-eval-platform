@@ -44,3 +44,21 @@ Health check:
 
 curl http://localhost:8030/health
 
+
+## Doctrine Alignment
+
+SecureTheCloud Agent Evaluation Platform is downstream of the SecureTheCloud doctrine control plane.
+
+Before changing suite positioning, module authority, product packaging, callable interfaces, enforcement behavior, evidence authority, or runtime authority, contributors must consult the doctrine control plane.
+
+Current boundary:
+
+- lab-safe evaluation platform surface
+- no new customer-offerable suite declaration
+- no new enforcement authority
+- no SENTINEL bypass
+- no runtime authority
+- no production agent execution
+- no live autonomous tool execution
+
+The platform may demonstrate simulated agent evaluation workflows and evidence records, but production authority must be granted through the doctrine control plane first.
