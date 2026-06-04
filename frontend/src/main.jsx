@@ -8,24 +8,30 @@ function App() {
   const [dashboard, setDashboard] = useState(null);
   const [agents, setAgents] = useState([]);
   const [runs, setRuns] = useState([]);
+  const [pillars, setPillars] = useState([]);
+  const [readiness, setReadiness] = useState([]);
   const [status, setStatus] = useState("Loading agent evaluation telemetry...");
 
   useEffect(() => {
     async function load() {
       try {
-        const [dashRes, agentsRes, runsRes] = await Promise.all([
+        const [dashRes, agentsRes, runsRes, pillarsRes, readinessRes] = await Promise.all([
           fetch(`${API_BASE}/api/dashboard`),
           fetch(`${API_BASE}/api/agents`),
-          fetch(`${API_BASE}/api/evaluation-runs`)
+          fetch(`${API_BASE}/api/evaluation-runs`),
+          fetch(`${API_BASE}/api/evaluation-pillars`),
+          fetch(`${API_BASE}/api/enterprise-readiness`)
         ]);
 
-        if (!dashRes.ok || !agentsRes.ok || !runsRes.ok) {
+        if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !pillarsRes.ok || !readinessRes.ok) {
           throw new Error("Backend returned non-OK response");
         }
 
         setDashboard(await dashRes.json());
         setAgents(await agentsRes.json());
         setRuns(await runsRes.json());
+        setPillars(await pillarsRes.json());
+        setReadiness(await readinessRes.json());
         setStatus("Live agent evaluation backend connected");
       } catch {
         setStatus("Backend connection failed. Demo shell loaded.");
@@ -37,6 +43,7 @@ function App() {
 
   const metricCards = dashboard
     ? [
+        ["Agent Trust", `${dashboard.agent_trust_score}/100`],
         ["Test Runs", dashboard.total_test_runs],
         ["Pass Rate", `${dashboard.pass_rate}%`],
         ["Fail Rate", `${dashboard.fail_rate}%`],
@@ -60,29 +67,36 @@ function App() {
           <p className="lede">
             Evaluation infrastructure for testing, scoring, and verifying autonomous AI agents before and after deployment.
           </p>
+          <div className="heroBadges">
+            <span>Before deployment</span>
+            <span>After deployment</span>
+            <span>CI eval gates</span>
+            <span>Evidence-first</span>
+          </div>
         </div>
 
         <div className="principle">
           <h3>Core Principle</h3>
-          <p>Agents must be tested before deployment, monitored after deployment, and re-evaluated whenever prompts, tools, memory, retrieval, policies, or workflows change.</p>
+          <p>
+            Agents must be tested before deployment, monitored after deployment,
+            and re-evaluated whenever prompts, tools, memory, retrieval, policies,
+            or workflows change.
+          </p>
           <p><b>AI can act. Governance verifies. Evidence proves.</b></p>
         </div>
       </section>
 
       <section className="shell">
         <h2 className="centerTitle">EVALUATION TRUST FABRIC</h2>
+        <p className="centerSub">
+          Flagship evaluation layer for agent quality, safety, tool behavior, RAG grounding, policy compliance, and regression control.
+        </p>
         <div className="fabricGrid">
-          {[
-            "Ground Truth",
-            "Scoring Engine",
-            "RAG Evaluation",
-            "Tool Verification",
-            "Policy Compliance",
-            "Regression Detection"
-          ].map((item) => (
-            <div className="card" key={item}>
+          {pillars.map((pillar) => (
+            <div className="card fabricCard" key={pillar.name}>
               <div className="hex">⬡</div>
-              <h3>{item}</h3>
+              <h3>{pillar.name}</h3>
+              <p>{pillar.description}</p>
             </div>
           ))}
         </div>
@@ -90,11 +104,44 @@ function App() {
 
       <section className="metrics">
         {metricCards.map(([label, value]) => (
-          <div className="metric" key={label}>
+          <div className={label === "Agent Trust" ? "metric trustMetric" : "metric"} key={label}>
             <strong>{value}</strong>
             <span>{label}</span>
           </div>
         ))}
+      </section>
+
+      <section className="shell">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 2 · FLAGSHIP OPERATING MODEL</p>
+            <h2>Agent Evaluation Lifecycle</h2>
+            <p>
+              A governed evaluation workflow for autonomous agents using prompts, tools, memory, retrieval, policy checks, and workflow automation.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>Evaluation Posture</span>
+            <b>{status}</b>
+          </div>
+        </div>
+
+        <div className="lifecycle">
+          {[
+            ["01", "Ground Truth", "Benchmark prompt, expected answer, policy, sources, and risk class."],
+            ["02", "Agent Run", "Agent produces output, retrieval context, memory reference, and tool path."],
+            ["03", "Score", "Hallucination, RAG grounding, tool accuracy, cost, latency, and policy compliance."],
+            ["04", "Validate", "Safety, memory, tenant, approval, and destructive-action boundaries are checked."],
+            ["05", "Detect Regression", "Compare against prior baselines for changed output, cost, risk, or failures."],
+            ["06", "Export Evidence", "Generate test run record, failure reason, remediation, and reviewer notes."]
+          ].map(([step, title, body]) => (
+            <div className="card lifecycleCard" key={step}>
+              <span className="step">{step}</span>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="gridTwo">
@@ -136,15 +183,34 @@ function App() {
               </div>
             ))}
           </div>
-
-          <div className="boundary">
-            <h3>Public Demo Boundary</h3>
-            <p>
-              Simulated agent evaluation workflow only. No real customer data, patient data, production agents,
-              live autonomous tools, regulated systems, production model runtimes, or enterprise authorization systems are connected.
-            </p>
-          </div>
         </div>
+      </section>
+
+      <section className="shell">
+        <p className="eyebrow">ENTERPRISE ESCALATION PATH</p>
+        <h2>Lab Today. Standalone Platform Ready.</h2>
+        <p>
+          Phase 2 keeps the product lab-safe while shaping the architecture toward an enterprise-grade evaluation platform.
+        </p>
+
+        <div className="enterpriseGrid">
+          {readiness.map((item) => (
+            <div className="card" key={item.area}>
+              <h3>{item.area}</h3>
+              <p><b>Current:</b> {item.lab_state}</p>
+              <p><b>Enterprise path:</b> {item.enterprise_path}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="boundary">
+        <h3>Public Demo Boundary</h3>
+        <p>
+          Simulated agent evaluation workflow only. No real customer data, patient data,
+          production agents, live autonomous tools, regulated systems, production model
+          runtimes, or enterprise authorization systems are connected.
+        </p>
       </section>
     </main>
   );

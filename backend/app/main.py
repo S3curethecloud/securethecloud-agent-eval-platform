@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="SecureTheCloud Agent Evaluation Platform API",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.add_middleware(
@@ -127,17 +127,76 @@ EVALUATION_RUNS = [
     },
 ]
 
-TEST_SUITES = [
-    "Factual Accuracy",
-    "Hallucination Detection",
-    "Tool-Call Correctness",
-    "RAG Source Grounding",
-    "Policy Compliance",
-    "Sensitive Data Handling",
-    "Prompt Injection Resilience",
-    "Memory Leakage",
-    "Multi-Step Reasoning",
-    "Cost Abuse / Retry Loops",
+EVALUATION_PILLARS = [
+    {
+        "name": "Ground Truth",
+        "description": "Expected answers, allowed sources, policy decisions, and benchmark metadata.",
+    },
+    {
+        "name": "Scoring Engine",
+        "description": "Hallucination, policy, tool, latency, cost, and regression scoring.",
+    },
+    {
+        "name": "RAG Evaluation",
+        "description": "Retrieval precision, source grounding, citation accuracy, and context quality.",
+    },
+    {
+        "name": "Tool Verification",
+        "description": "Tool-call correctness, forbidden tool blocking, parameters, and approval gates.",
+    },
+    {
+        "name": "Policy Compliance",
+        "description": "NIST AI RMF, Responsible AI, SOC 2, HIPAA-style, and internal policy mapping.",
+    },
+    {
+        "name": "Regression Detection",
+        "description": "Baseline drift, output changes, new failures, latency/cost regressions, and risk tier changes.",
+    },
+    {
+        "name": "Memory Evaluation",
+        "description": "Memory leakage, session isolation, tenant separation, context expiration, and sensitive retention.",
+    },
+    {
+        "name": "Safety Verification",
+        "description": "Prompt injection, tool hijacking, approval bypass, unsafe delegation, and policy evasion.",
+    },
+    {
+        "name": "Multi-Agent Coordination",
+        "description": "Agent-to-agent trust, handoff correctness, message integrity, escalation logic, and coordination failures.",
+    },
+]
+
+ENTERPRISE_READINESS = [
+    {
+        "area": "Tenant Boundary",
+        "lab_state": "Simulated",
+        "enterprise_path": "Add organization, workspace, user, role, and tenant-scoped eval stores.",
+    },
+    {
+        "area": "Evaluation Runner",
+        "lab_state": "Deterministic seed logic",
+        "enterprise_path": "Move scoring into isolated workers with queue-backed execution and retry controls.",
+    },
+    {
+        "area": "Evidence Store",
+        "lab_state": "In-memory payloads",
+        "enterprise_path": "Persist evaluation runs, artifacts, prompts, retrieved context, scores, and reviewer notes.",
+    },
+    {
+        "area": "Policy Packs",
+        "lab_state": "Static simulated decisions",
+        "enterprise_path": "Version policy rules by framework, business unit, risk class, and approval workflow.",
+    },
+    {
+        "area": "Security Model",
+        "lab_state": "Public lab boundary",
+        "enterprise_path": "Add RBAC, audit logging, secret management, approval gates, and destructive-action controls.",
+    },
+    {
+        "area": "CI / Release Gates",
+        "lab_state": "Manual validation",
+        "enterprise_path": "Run eval suites in CI before prompt, model, RAG, tool, or workflow releases.",
+    },
 ]
 
 
@@ -147,7 +206,7 @@ def health():
         "status": "ok",
         "service": "securethecloud-agent-eval-platform",
         "lab_mode": True,
-        "phase": "1",
+        "phase": "2",
     }
 
 
@@ -161,9 +220,34 @@ def evaluation_runs():
     return EVALUATION_RUNS
 
 
+@app.get("/api/evaluation-pillars")
+def evaluation_pillars():
+    return EVALUATION_PILLARS
+
+
+@app.get("/api/enterprise-readiness")
+def enterprise_readiness():
+    return ENTERPRISE_READINESS
+
+
 @app.get("/api/test-suites")
 def test_suites():
-    return {"test_suites": TEST_SUITES}
+    return {
+        "test_suites": [
+            "Factual Accuracy",
+            "Hallucination Detection",
+            "Tool-Call Correctness",
+            "RAG Source Grounding",
+            "Policy Compliance",
+            "Sensitive Data Handling",
+            "Prompt Injection Resilience",
+            "Memory Leakage",
+            "Multi-Step Reasoning",
+            "Cost Abuse / Retry Loops",
+            "Multi-Agent Coordination",
+            "Agent Safety Verification",
+        ]
+    }
 
 
 @app.get("/api/dashboard")
@@ -194,4 +278,8 @@ def dashboard():
         "human_escalation_rate": round((escalations / total) * 100),
         "blocked_runs": blocked,
         "highest_risk_tier": "high",
+        "agent_trust_score": 84,
+        "memory_eval_coverage": 100,
+        "safety_eval_coverage": 100,
+        "multi_agent_eval_ready": True,
     }
