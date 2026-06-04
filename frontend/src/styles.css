@@ -377,3 +377,14 @@ h3 {
     font-size: 1.45rem;
   }
 }
+
+.soc2Panel {
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(113, 63, 18, 0.18);
+}
+
+.soc2Note {
+  margin-top: 18px;
+  color: #fde68a;
+  font-weight: 800;
+}

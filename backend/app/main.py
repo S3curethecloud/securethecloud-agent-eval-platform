@@ -283,3 +283,49 @@ def dashboard():
         "safety_eval_coverage": 100,
         "multi_agent_eval_ready": True,
     }
+
+
+@app.get("/api/soc2/readiness")
+def soc2_readiness():
+    return {
+        "platform": "SecureTheCloud Agent Evaluation Platform",
+        "soc2_alignment": "readiness_evidence_only",
+        "certification_claimed": False,
+        "audit_attestation_claimed": False,
+        "production_operating_effectiveness_claimed": False,
+        "trust_services_alignment": [
+            "Security",
+            "Availability",
+            "Processing Integrity",
+            "Confidentiality",
+            "Privacy",
+        ],
+        "evidence_documents": [
+            "docs/soc2/SOC2_ALIGNMENT_OVERVIEW.md",
+            "docs/soc2/SOC2_CONTROL_TRACEABILITY.md",
+            "docs/soc2/SOC2_EVIDENCE_REGISTER.md",
+            "docs/soc2/SOC2_CHANGE_MANAGEMENT.md",
+        ],
+        "evidence_capabilities": [
+            "agent inventory",
+            "evaluation run records",
+            "policy compliance decisions",
+            "hallucination scoring",
+            "tool-call verification",
+            "RAG grounding evaluation",
+            "memory/session evaluation",
+            "regression detection",
+            "human review queue",
+            "evidence package export",
+        ],
+        "current_boundary": {
+            "lab_safe": True,
+            "real_customer_data": False,
+            "real_patient_data": False,
+            "production_agents": False,
+            "live_autonomous_tools": False,
+            "production_enforcement": False,
+            "sentinel_bypass": False,
+            "runtime_authority": False,
+        },
+    }

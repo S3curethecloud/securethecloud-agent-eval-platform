@@ -204,6 +204,35 @@ function App() {
         </div>
       </section>
 
+      <section className="shell soc2Panel">
+        <p className="eyebrow">SOC 2 READINESS</p>
+        <h2>SOC 2-Aligned Evidence Posture</h2>
+        <p>
+          The platform generates lab-safe readiness evidence for agent evaluation workflows across
+          Security, Availability, Processing Integrity, Confidentiality, and Privacy.
+        </p>
+
+        <div className="enterpriseGrid">
+          {[
+            ["Security", "Policy compliance, tool verification, safety checks"],
+            ["Availability", "Regression, latency, cost, and reliability signals"],
+            ["Processing Integrity", "Ground truth, hallucination scoring, RAG grounding"],
+            ["Confidentiality", "Sensitive data handling, memory/session checks"],
+            ["Privacy", "Retention boundary, no real customer or patient data"]
+          ].map(([title, body]) => (
+            <div className="card" key={title}>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="soc2Note">
+          Readiness evidence only. This lab does not claim SOC 2 certification, auditor attestation,
+          or production operating effectiveness.
+        </p>
+      </section>
+
       <section className="boundary">
         <h3>Public Demo Boundary</h3>
         <p>
