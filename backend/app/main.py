@@ -505,7 +505,7 @@ def health():
         "status": "ok",
         "service": "securethecloud-agent-eval-platform",
         "lab_mode": True,
-        "phase": "3",
+        "phase": "4",
     }
 
 
@@ -689,10 +689,10 @@ def soc2_readiness():
 def platform_sot():
     return {
         "platform": "SecureTheCloud Agent Evaluation Platform",
-        "current_phase": "Phase 3 — Test Harness Engine & Run Traceability",
+        "current_phase": "Phase 4 — Ground Truth Benchmark Store",
         "current_posture": "lab_safe_evaluation_surface",
-        "latest_stable_baseline": "v0.3.0-test-harness-engine",
-        "next_planned_phase": "Phase 4 — Ground Truth Benchmark Store",
+        "latest_stable_baseline": "v0.4.0-ground-truth-benchmark-store",
+        "next_planned_phase": "Phase 5 — Hallucination Scoring Engine",
         "doctrine_boundary": {
             "new_suite_membership": False,
             "enforcement_authority": False,
@@ -748,4 +748,123 @@ def platform_sot():
             "v0.2.4-platform-sot-traceability-foundation",
             "v0.3.0-test-harness-engine",
         ],
+    }
+
+
+def soc2_trace_for_benchmark(benchmark):
+    category = benchmark["category"]
+    if category in ["tool_call_verification", "agent_safety_verification", "prompt_injection_resilience"]:
+        return ["Security", "Processing Integrity"]
+    if category in ["cost_latency_evaluation", "regression_detection"]:
+        return ["Availability", "Processing Integrity"]
+    if category in ["memory_session_evaluation", "sensitive_data_handling"]:
+        return ["Confidentiality", "Privacy"]
+    if category in ["multi_agent_coordination", "handoff_integrity"]:
+        return ["Security", "Privacy", "Processing Integrity"]
+    return ["Processing Integrity"]
+
+
+def benchmark_store_record(benchmark):
+    return {
+        "benchmark_id": benchmark["benchmark_id"],
+        "suite_id": benchmark["suite_id"],
+        "test_id": benchmark["test_id"],
+        "category": benchmark["category"],
+        "risk_classification": benchmark["risk_classification"],
+        "expected_policy_decision": benchmark["expected_policy_decision"],
+        "expected_result": benchmark["expected_result"],
+        "required_citation": benchmark["required_citation"],
+        "allowed_source_count": len(benchmark["allowed_sources"]),
+        "forbidden_source_count": len(benchmark["forbidden_sources"]),
+        "expected_tool_call": benchmark.get("expected_tool_call", "none"),
+        "forbidden_tool": benchmark.get("forbidden_tool", ""),
+        "failure_type": benchmark.get("failure_type", ""),
+        "soc2_trace": soc2_trace_for_benchmark(benchmark),
+        "traceability": {
+            "benchmark_id": benchmark["benchmark_id"],
+            "suite_id": benchmark["suite_id"],
+            "test_id": benchmark["test_id"],
+            "policy_decision_expected": benchmark["expected_policy_decision"],
+        },
+    }
+
+
+@app.get("/api/ground-truth")
+def ground_truth_store():
+    return {
+        "store_type": "ground_truth_benchmark_store",
+        "platform": "SecureTheCloud Agent Evaluation Platform",
+        "phase": "4",
+        "lab_safe": True,
+        "production_agent_execution": False,
+        "benchmark_count": len(BENCHMARKS),
+        "suite_count": len(TEST_SUITES),
+        "records": [benchmark_store_record(benchmark) for benchmark in BENCHMARKS],
+    }
+
+
+@app.get("/api/ground-truth/coverage")
+def ground_truth_coverage():
+    categories = sorted({benchmark["category"] for benchmark in BENCHMARKS})
+    risk_classes = sorted({benchmark["risk_classification"] for benchmark in BENCHMARKS})
+    policy_decisions = sorted({benchmark["expected_policy_decision"] for benchmark in BENCHMARKS})
+    citation_required = sum(1 for benchmark in BENCHMARKS if benchmark["required_citation"])
+    destructive_tool_tests = sum(1 for benchmark in BENCHMARKS if benchmark.get("forbidden_tool"))
+
+    return {
+        "benchmark_count": len(BENCHMARKS),
+        "suite_count": len(TEST_SUITES),
+        "category_count": len(categories),
+        "categories": categories,
+        "risk_classes": risk_classes,
+        "expected_policy_decisions": policy_decisions,
+        "citation_required_count": citation_required,
+        "destructive_tool_test_count": destructive_tool_tests,
+        "soc2_trace_areas": [
+            "Security",
+            "Availability",
+            "Processing Integrity",
+            "Confidentiality",
+            "Privacy",
+        ],
+        "coverage_statement": "Ground truth benchmarks cover hallucination, RAG grounding, tool blocking, memory leakage, cost abuse, and multi-agent handoff scenarios.",
+    }
+
+
+@app.get("/api/ground-truth/{benchmark_id}")
+def ground_truth_detail(benchmark_id: str):
+    benchmark = find_benchmark(benchmark_id)
+    if benchmark is None:
+        raise HTTPException(status_code=404, detail="Ground truth benchmark not found")
+
+    suite = find_suite(benchmark["suite_id"])
+    related_runs = [
+        run for run in EVALUATION_RUNS
+        if run["benchmark_id"] == benchmark_id
+    ]
+
+    return {
+        "benchmark": benchmark,
+        "suite": suite,
+        "soc2_trace": soc2_trace_for_benchmark(benchmark),
+        "related_runs": related_runs,
+        "traceability_path": [
+            "ground_truth_store",
+            "test_suite",
+            "benchmark",
+            "expected_answer",
+            "allowed_sources",
+            "forbidden_sources",
+            "expected_policy_decision",
+            "evaluation_runs",
+            "evidence_packages",
+        ],
+        "doctrine_boundary": {
+            "simulated_evaluation_only": True,
+            "production_agent_execution": False,
+            "live_autonomous_tool_execution": False,
+            "enforcement_authority": False,
+            "sentinel_bypass": False,
+            "runtime_authority": False,
+        },
     }

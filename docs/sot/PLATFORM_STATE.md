@@ -10,7 +10,7 @@ SecureTheCloud Agent Evaluation Platform
 |---|---|
 | Current phase | Phase 4 — Ground Truth Benchmark Store & Run Traceability |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.3.0-test-harness-engine |
+| Latest stable baseline | v0.4.0-ground-truth-benchmark-store |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 4 — Ground Truth Benchmark Store
+Phase 5 — Hallucination Scoring Engine
 
 Planned additions:
 

@@ -142,3 +142,33 @@ Current Phase 3 endpoints:
 - `GET /api/evidence-packages/{evidence_id}`
 
 The harness remains deterministic and lab-safe. It does not execute production agents or live autonomous tools.
+
+## Ground Truth Benchmark Store
+
+The Phase 4 Ground Truth Benchmark Store defines governed benchmark records for agent evaluation.
+
+Each benchmark includes:
+
+- benchmark ID
+- suite ID
+- test ID
+- category
+- question
+- expected answer
+- allowed sources
+- forbidden sources
+- required citation flag
+- risk classification
+- expected tool call
+- expected policy decision
+- expected result
+- failure type
+- recommended remediation
+
+Phase 4 endpoints:
+
+- `GET /api/ground-truth`
+- `GET /api/ground-truth/coverage`
+- `GET /api/ground-truth/{benchmark_id}`
+
+The benchmark store is lab-safe and deterministic. It does not execute production agents or live autonomous tools.

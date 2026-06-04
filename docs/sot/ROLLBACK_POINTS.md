@@ -52,3 +52,5 @@ runtime agents
 live autonomous tool state
 
 Current platform is lab-safe and does not contain production runtime state.
+
+| v0.4.0-ground-truth-benchmark-store | Ground Truth Benchmark Store | Adds traceable benchmark management and source/policy expectations |

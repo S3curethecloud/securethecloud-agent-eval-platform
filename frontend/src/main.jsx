@@ -104,6 +104,10 @@ function App() {
       ]
     : [];
 
+  const selectedBenchmark = benchmarks.find(
+    (benchmark) => benchmark.benchmark_id === selectedBenchmarkId
+  );
+
   return (
     <main className="page">
       <section className="hero shell">
@@ -219,6 +223,79 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="shell groundTruthPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 4 · GROUND TRUTH BENCHMARK STORE</p>
+            <h2>Benchmark Management & Traceability</h2>
+            <p>
+              Ground truth records define the expected answer, allowed sources, forbidden sources,
+              required citations, expected policy decision, risk classification, and remediation path
+              for every deterministic agent evaluation run.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>Benchmark Coverage</span>
+            <b>{benchmarks.length} traceable records</b>
+          </div>
+        </div>
+
+        <div className="groundTruthGrid">
+          <div className="stack">
+            {benchmarks.map((benchmark) => (
+              <button
+                key={benchmark.benchmark_id}
+                className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
+                onClick={() => setSelectedBenchmarkId(benchmark.benchmark_id)}
+              >
+                <div className="row">
+                  <h3>{benchmark.test_id}</h3>
+                  <span className="pill">{benchmark.risk_classification}</span>
+                </div>
+                <p>{benchmark.category}</p>
+                <p>Expected policy: <b>{benchmark.expected_policy_decision}</b></p>
+                <p>Citation required: <b>{benchmark.required_citation ? "yes" : "no"}</b></p>
+              </button>
+            ))}
+          </div>
+
+          <div className="card benchmarkDetail">
+            <p className="eyebrow">BENCHMARK DETAIL</p>
+            {selectedBenchmark ? (
+              <>
+                <h3>{selectedBenchmark.benchmark_id}</h3>
+                <p><b>Question:</b> {selectedBenchmark.question}</p>
+                <p><b>Expected answer:</b> {selectedBenchmark.expected_answer}</p>
+                <p><b>Expected tool:</b> {selectedBenchmark.expected_tool_call || "none"}</p>
+                <p><b>Expected policy:</b> {selectedBenchmark.expected_policy_decision}</p>
+                <p><b>Recommended remediation:</b> {selectedBenchmark.recommended_remediation}</p>
+
+                <div className="sourceColumns">
+                  <div>
+                    <h3>Allowed Sources</h3>
+                    {selectedBenchmark.allowed_sources.map((source) => (
+                      <span className="sourceChip allowedSource" key={source}>{source}</span>
+                    ))}
+                  </div>
+                  <div>
+                    <h3>Forbidden Sources</h3>
+                    {selectedBenchmark.forbidden_sources.map((source) => (
+                      <span className="sourceChip forbiddenSource" key={source}>{source}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="drillPath">
+                  <b>Trace:</b> Benchmark → Expected Answer → Sources → Policy Decision → Evaluation Run → Evidence Package
+                </div>
+              </>
+            ) : (
+              <p>Select a benchmark to inspect ground truth detail.</p>
+            )}
+          </div>
         </div>
       </section>
 
