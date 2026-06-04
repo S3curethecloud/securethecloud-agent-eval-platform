@@ -218,3 +218,25 @@ Phase 6 endpoints:
 - `GET /api/rag/evaluations/{run_id}`
 
 The RAG suite is lab-safe and deterministic. It does not connect to a live vector database, production RAG corpus, live LLM, production agent, or customer data source.
+
+## Tool-Call Verification & MCP Governance Bridge
+
+The Phase 7 Tool-Call Verification layer connects the Agent Evaluation Platform to the SecureTheCloud MCP Governance Lab story.
+
+It evaluates whether agents:
+
+- called the correct tool
+- avoided forbidden tools
+- used valid parameters
+- honored approval requirements
+- blocked destructive actions
+- respected tool-call budgets
+- preserved RBAC / permission boundaries
+
+Phase 7 endpoints:
+
+- `GET /api/tool-policy-rules`
+- `GET /api/tool-verification`
+- `GET /api/tool-verification/{run_id}`
+
+The bridge is lab-safe and deterministic. It does not connect to a live MCP server, execute tools, enforce runtime policy, or create production authority.

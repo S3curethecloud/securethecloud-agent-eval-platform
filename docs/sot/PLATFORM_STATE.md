@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 6 — RAG Evaluation Suite & Run Traceability |
+| Current phase | Phase 7 — Tool-Call Verification & MCP Governance Bridge & Run Traceability |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.6.0-rag-evaluation-suite |
+| Latest stable baseline | v0.7.0-tool-call-verification |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 7 — Tool-Call Verification
+Phase 8 — Policy Compliance Validator
 
 Planned additions:
 

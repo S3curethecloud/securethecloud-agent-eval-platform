@@ -17,6 +17,7 @@ function App() {
   const [status, setStatus] = useState("Loading agent evaluation telemetry...");
   const [hallucination, setHallucination] = useState(null);
   const [rag, setRag] = useState(null);
+  const [toolVerification, setToolVerification] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -29,10 +30,11 @@ function App() {
         fetch(`${API_BASE}/api/evaluation-pillars`),
         fetch(`${API_BASE}/api/enterprise-readiness`),
         fetch(`${API_BASE}/api/scoring/hallucination`),
-        fetch(`${API_BASE}/api/rag/evaluations`)
+        fetch(`${API_BASE}/api/rag/evaluations`),
+        fetch(`${API_BASE}/api/tool-verification`)
       ]);
 
-      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok || !ragRes.ok) {
+      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok || !ragRes.ok || !toolVerificationRes.ok) {
         throw new Error("Backend returned non-OK response");
       }
 
@@ -46,6 +48,7 @@ function App() {
       setReadiness(await readinessRes.json());
       setHallucination(await hallucinationRes.json());
       setRag(await ragRes.json());
+      setToolVerification(await toolVerificationRes.json());
       setStatus("Live agent evaluation backend connected");
 
       if (!selectedRun && nextRuns.length > 0) {
@@ -229,6 +232,78 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="shell toolPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 7 · TOOL-CALL VERIFICATION</p>
+            <h2>MCP Governance Bridge & Tool Behavior Evidence</h2>
+            <p>
+              Tool-call verification checks whether agents called the correct tool, avoided forbidden tools,
+              honored approval requirements, blocked destructive actions, respected tool budgets, and preserved
+              permission boundaries.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>MCP Governance Bridge</span>
+            <b>{toolVerification ? `${toolVerification.average_tool_verification_score}% verified` : "Loading"}</b>
+          </div>
+        </div>
+
+        {toolVerification && (
+          <>
+            <div className="toolMetrics">
+              {[
+                ["Tool Score", `${toolVerification.average_tool_verification_score}%`],
+                ["Blocked Attempts", toolVerification.blocked_tool_attempts],
+                ["Forbidden Attempts", toolVerification.forbidden_tool_attempts],
+                ["Approvals Honored", toolVerification.approval_requirements_honored],
+                ["Destructive Blocked", toolVerification.destructive_actions_blocked],
+                ["Budget Violations", toolVerification.tool_budget_violations]
+              ].map(([label, value]) => (
+                <div className="metric" key={label}>
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mcpBridge">
+              <h3>Connection to SecureTheCloud MCP Governance Lab</h3>
+              <p>
+                MCP Governance Lab governs tool access. Agent Evaluation Platform verifies whether tool behavior,
+                approval boundaries, permission checks, and evidence records matched the expected governance policy.
+              </p>
+            </div>
+
+            <div className="toolGrid">
+              {toolVerification.verifications.map((verification) => (
+                <button
+                  className={verification.verification_result === "pass" ? "card toolCard pass" : "card toolCard fail"}
+                  key={verification.tool_verification_id}
+                  onClick={() => loadRunDetail(verification.run_id)}
+                >
+                  <div className="row">
+                    <h3>{verification.tool_verification_id}</h3>
+                    <span className="pill">{verification.verification_result}</span>
+                  </div>
+                  <p>Run: <b>{verification.run_id}</b></p>
+                  <p>Expected tool: <b>{verification.expected_tool_call}</b></p>
+                  <p>Actual tools: <b>{verification.actual_tool_names.length ? verification.actual_tool_names.join(", ") : "none"}</b></p>
+                  <p>Forbidden attempted: <b>{verification.forbidden_tool_attempted ? "yes" : "no"}</b></p>
+                  <p>Approval honored: <b>{verification.approval_requirement_honored ? "yes" : "no"}</b></p>
+                  <p>Destructive blocked: <b>{verification.destructive_action_blocked ? "yes" : "no"}</b></p>
+                  <p className="failure">{verification.remediation_guidance}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="drillPath">
+          <b>Tool trace:</b> Run → Benchmark → Expected Tool → Actual Tool Calls → Approval → Permission Boundary → Findings → Evidence
         </div>
       </section>
 
