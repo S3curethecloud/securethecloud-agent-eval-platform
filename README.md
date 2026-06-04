@@ -96,3 +96,17 @@ It evaluates:
 - SOC 2-aligned evidence readiness
 
 Current state remains lab-safe and simulated.
+
+## Platform State of Truth
+
+The platform State of Truth records the current governed state of the Agent Evaluation Platform, including active phase, release tags, doctrine boundary, SOC 2 readiness posture, rollback points, and traceability object model.
+
+The SoT is not a runtime authority source and does not grant enforcement authority. It exists to support governed development, rollback, auditability, and evidence reconstruction.
+
+Current SoT documents:
+
+- `docs/sot/PLATFORM_STATE.md`
+- `docs/sot/ROLLBACK_POINTS.md`
+- `docs/sot/TRACEABILITY_MODEL.md`
+
+The platform is designed to evolve toward drill-down traceability from executive dashboard metrics to underlying agents, benchmarks, evaluation runs, policy decisions, scores, reviewer notes, remediation, and evidence packages.

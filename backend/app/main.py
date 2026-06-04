@@ -329,3 +329,68 @@ def soc2_readiness():
             "runtime_authority": False,
         },
     }
+
+
+@app.get("/api/platform/sot")
+def platform_sot():
+    return {
+        "platform": "SecureTheCloud Agent Evaluation Platform",
+        "current_phase": "Phase 2C — Platform SoT, Traceability & Rollback Foundation",
+        "current_posture": "lab_safe_evaluation_surface",
+        "latest_stable_baseline": "v0.2.3-ecosystem-integration-positioning",
+        "next_planned_phase": "Phase 3 — Test Harness Engine",
+        "doctrine_boundary": {
+            "new_suite_membership": False,
+            "enforcement_authority": False,
+            "runtime_authority": False,
+            "sentinel_bypass": False,
+            "production_agent_execution": False,
+            "live_autonomous_tools": False,
+        },
+        "soc2_boundary": {
+            "readiness_evidence_only": True,
+            "soc2_certification_claimed": False,
+            "auditor_attestation_claimed": False,
+            "production_operating_effectiveness_claimed": False,
+        },
+        "traceability_objects": [
+            "agent_id",
+            "suite_id",
+            "benchmark_id",
+            "test_id",
+            "run_id",
+            "score_id",
+            "policy_decision_id",
+            "evidence_id",
+            "review_id",
+            "remediation_id",
+            "change_id",
+            "release_id",
+        ],
+        "drill_down_path": [
+            "dashboard_metric",
+            "agent",
+            "test_suite",
+            "benchmark",
+            "evaluation_run",
+            "prompt",
+            "ground_truth",
+            "retrieved_context",
+            "tool_calls",
+            "policy_decision",
+            "scores",
+            "failure_reason",
+            "recommended_remediation",
+            "reviewer_notes",
+            "evidence_package",
+        ],
+        "rollback_tags": [
+            "v0.1.0-agent-eval-baseline",
+            "v0.1.1-doctrine-alignment-gate",
+            "v0.2.0-mobile-enterprise-foundation",
+            "v0.2.1-doctrine-mobile-foundation-merged",
+            "v0.2.2-soc2-alignment-gate",
+            "v0.2.3-ecosystem-integration-positioning",
+            "v0.2.4-platform-sot-traceability-foundation",
+        ],
+    }

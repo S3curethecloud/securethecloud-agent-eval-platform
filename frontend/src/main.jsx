@@ -204,6 +204,34 @@ function App() {
         </div>
       </section>
 
+      <section className="shell sotPanel">
+        <p className="eyebrow">PLATFORM SOT & TRACEABILITY</p>
+        <h2>State of Truth, Rollback & Drill-Down Foundation</h2>
+        <p>
+          The Agent Evaluation Platform is designed for enterprise-grade traceability:
+          dashboard metrics should drill down into agents, test suites, benchmarks,
+          evaluation runs, policy decisions, scores, remediation, reviewer notes, and evidence packages.
+        </p>
+
+        <div className="traceGrid">
+          {[
+            ["State of Truth", "Tracks phase, posture, doctrine boundary, SOC 2 readiness, and rollback state."],
+            ["Rollback Points", "Stable tags preserve known-good baselines for recovery and audit history."],
+            ["Traceability IDs", "Agents, suites, benchmarks, tests, runs, scores, decisions, evidence, and reviews get stable IDs."],
+            ["Evidence Drill-Down", "Metrics should reconstruct the prompt, context, tool calls, policy decision, score, and remediation."]
+          ].map(([title, body]) => (
+            <div className="card" key={title}>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="drillPath">
+          <b>Drill-down path:</b> Dashboard → Agent → Suite → Benchmark → Run → Prompt → Context → Tool Calls → Policy → Scores → Evidence
+        </div>
+      </section>
+
       <section className="shell ecosystemPanel">
         <p className="eyebrow">SECURETHECLOUD ECOSYSTEM FIT</p>
         <h2>Flagship Evaluation Surface Across the Portfolio</h2>
