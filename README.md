@@ -172,3 +172,26 @@ Phase 4 endpoints:
 - `GET /api/ground-truth/{benchmark_id}`
 
 The benchmark store is lab-safe and deterministic. It does not execute production agents or live autonomous tools.
+
+## Hallucination Scoring Engine
+
+The Phase 5 Hallucination Scoring Engine adds deterministic claim-level grounding analysis.
+
+It evaluates:
+
+- unsupported claims
+- contradictions
+- missing citations
+- grounded facts
+- forbidden source usage
+- source support
+- claim-level score
+- remediation guidance
+- SOC 2 Processing Integrity traceability
+
+Phase 5 endpoints:
+
+- `GET /api/scoring/hallucination`
+- `GET /api/scoring/hallucination/{run_id}`
+
+The scoring engine is lab-safe and deterministic. It does not call live LLMs, execute production agents, or perform production enforcement.

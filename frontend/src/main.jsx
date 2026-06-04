@@ -15,6 +15,7 @@ function App() {
   const [selectedAgentId, setSelectedAgentId] = useState("agent_policy_copilot");
   const [selectedBenchmarkId, setSelectedBenchmarkId] = useState("benchmark_regulatory_claim_grounding");
   const [status, setStatus] = useState("Loading agent evaluation telemetry...");
+  const [hallucination, setHallucination] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -25,10 +26,11 @@ function App() {
         fetch(`${API_BASE}/api/evaluation-runs`),
         fetch(`${API_BASE}/api/benchmarks`),
         fetch(`${API_BASE}/api/evaluation-pillars`),
-        fetch(`${API_BASE}/api/enterprise-readiness`)
+        fetch(`${API_BASE}/api/enterprise-readiness`),
+        fetch(`${API_BASE}/api/scoring/hallucination`)
       ]);
 
-      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok) {
+      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok) {
         throw new Error("Backend returned non-OK response");
       }
 
@@ -40,6 +42,7 @@ function App() {
       setBenchmarks(await benchmarksRes.json());
       setPillars(await pillarsRes.json());
       setReadiness(await readinessRes.json());
+      setHallucination(await hallucinationRes.json());
       setStatus("Live agent evaluation backend connected");
 
       if (!selectedRun && nextRuns.length > 0) {
@@ -223,6 +226,66 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="shell hallucinationPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 5 · HALLUCINATION SCORING ENGINE</p>
+            <h2>Claim-Level Grounding & Source Support</h2>
+            <p>
+              The scoring engine evaluates unsupported claims, contradictions, missing citations,
+              grounded facts, source support, claim-level score, and remediation guidance.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>Processing Integrity Trace</span>
+            <b>{hallucination ? `${hallucination.average_claim_level_score}/3 claim score` : "Loading"}</b>
+          </div>
+        </div>
+
+        {hallucination && (
+          <>
+            <div className="scoringMetrics">
+              {[
+                ["Unsupported Claims", hallucination.unsupported_claims],
+                ["Contradictions", hallucination.contradictions],
+                ["Missing Citations", hallucination.missing_citations],
+                ["Forbidden Sources", hallucination.forbidden_source_uses],
+                ["Avg Hallucination", `${hallucination.average_hallucination_score}/3`],
+                ["Avg Claim Score", `${hallucination.average_claim_level_score}/3`]
+              ].map(([label, value]) => (
+                <div className="metric" key={label}>
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="claimGrid">
+              {hallucination.summaries.map((summary) => (
+                <button
+                  className="card selectableCard"
+                  key={summary.run_id}
+                  onClick={() => loadRunDetail(summary.run_id)}
+                >
+                  <div className="row">
+                    <h3>{summary.run_id}</h3>
+                    <span className="pill">{summary.hallucination_score}/3</span>
+                  </div>
+                  <p>Claim score: <b>{summary.claim_level_score}/3</b></p>
+                  <p>Source support: <b>{summary.source_support_score}%</b></p>
+                  <p>Unsupported: <b>{summary.unsupported_claims}</b> · Missing citations: <b>{summary.missing_citations}</b></p>
+                  <p className="failure">{summary.remediation_guidance}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="drillPath">
+          <b>Scoring trace:</b> Run → Agent Output → Claim → Source Support → Citation Check → Contradiction Check → Score → Remediation
         </div>
       </section>
 
