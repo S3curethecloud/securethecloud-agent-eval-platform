@@ -110,3 +110,35 @@ Current SoT documents:
 - `docs/sot/TRACEABILITY_MODEL.md`
 
 The platform is designed to evolve toward drill-down traceability from executive dashboard metrics to underlying agents, benchmarks, evaluation runs, policy decisions, scores, reviewer notes, remediation, and evidence packages.
+
+## Test Harness Engine
+
+The Phase 3 test harness engine introduces deterministic, benchmark-driven evaluation runs.
+
+The platform now supports drill-down from dashboard metrics and run cards into:
+
+- agent
+- test suite
+- benchmark
+- evaluation run
+- prompt
+- expected answer
+- actual output
+- retrieved context
+- tool calls
+- policy decision
+- scores
+- failure reason
+- recommended remediation
+- evidence package
+
+Current Phase 3 endpoints:
+
+- `GET /api/benchmarks`
+- `GET /api/failure-taxonomy`
+- `GET /api/evaluation-runs`
+- `GET /api/evaluation-runs/{run_id}`
+- `POST /api/evaluation-runs`
+- `GET /api/evidence-packages/{evidence_id}`
+
+The harness remains deterministic and lab-safe. It does not execute production agents or live autonomous tools.

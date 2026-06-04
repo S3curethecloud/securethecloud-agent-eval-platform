@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 2C — Platform SoT, Traceability & Rollback Foundation |
+| Current phase | Phase 4 — Ground Truth Benchmark Store & Run Traceability |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.2.3-ecosystem-integration-positioning |
+| Latest stable baseline | v0.3.0-test-harness-engine |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 3 — Test Harness Engine
+Phase 4 — Ground Truth Benchmark Store
 
 Planned additions:
 

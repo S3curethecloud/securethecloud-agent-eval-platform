@@ -457,3 +457,164 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+.harnessPanel {
+  border-color: rgba(34, 197, 94, 0.72);
+  background: rgba(20, 83, 45, 0.12);
+}
+
+.harnessControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 220px;
+  gap: 14px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+.harnessControls label {
+  display: grid;
+  gap: 8px;
+  font-weight: 900;
+}
+
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--deep);
+  color: var(--text);
+  padding: 12px;
+}
+
+.primaryButton {
+  border: 0;
+  border-radius: 12px;
+  background: var(--cyan);
+  color: #020617;
+  padding: 14px 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.benchmarkGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.selectableCard,
+.selectedCard,
+.runCard,
+.clickableMetric {
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.selectedCard {
+  border-color: var(--green);
+  background: rgba(20, 83, 45, 0.26);
+}
+
+.runCard {
+  width: 100%;
+}
+
+.detailPanel {
+  border-color: rgba(232, 121, 249, 0.72);
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.passBorder {
+  border-color: var(--green);
+}
+
+.failBorder {
+  border-color: var(--red);
+}
+
+.tracePath {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tracePath span {
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.evidenceBox {
+  margin-top: 14px;
+}
+
+.sotPanel {
+  border-color: rgba(34, 197, 94, 0.72);
+  background: rgba(20, 83, 45, 0.16);
+}
+
+.traceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.drillPath {
+  border: 1px solid rgba(34, 211, 238, 0.62);
+  border-radius: 18px;
+  padding: 18px;
+  margin-top: 18px;
+  background: rgba(2, 6, 23, 0.58);
+  font-weight: 800;
+}
+
+@media (max-width: 1200px) {
+  .benchmarkGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .traceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .harnessControls,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .benchmarkGrid,
+  .traceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

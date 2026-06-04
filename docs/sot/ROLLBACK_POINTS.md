@@ -21,6 +21,7 @@ Rollback points are Git tags or commits that represent known-good states.
 | v0.2.2-soc2-alignment-gate | SOC 2 alignment gate | Adds SOC 2 readiness docs and panel |
 | v0.2.3-ecosystem-integration-positioning | Ecosystem positioning | Adds SecureTheCloud portfolio fit |
 | v0.2.4-platform-sot-traceability-foundation | Platform SoT foundation | Adds rollback, traceability, and drill-down model |
+| v0.3.0-test-harness-engine | Test harness engine | Adds benchmark-driven deterministic runs and drill-down evidence |
 
 ## Rollback Command Pattern
 

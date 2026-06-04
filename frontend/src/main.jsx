@@ -8,36 +8,83 @@ function App() {
   const [dashboard, setDashboard] = useState(null);
   const [agents, setAgents] = useState([]);
   const [runs, setRuns] = useState([]);
+  const [benchmarks, setBenchmarks] = useState([]);
   const [pillars, setPillars] = useState([]);
   const [readiness, setReadiness] = useState([]);
+  const [selectedRun, setSelectedRun] = useState(null);
+  const [selectedAgentId, setSelectedAgentId] = useState("agent_policy_copilot");
+  const [selectedBenchmarkId, setSelectedBenchmarkId] = useState("benchmark_regulatory_claim_grounding");
   const [status, setStatus] = useState("Loading agent evaluation telemetry...");
+  const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [dashRes, agentsRes, runsRes, pillarsRes, readinessRes] = await Promise.all([
-          fetch(`${API_BASE}/api/dashboard`),
-          fetch(`${API_BASE}/api/agents`),
-          fetch(`${API_BASE}/api/evaluation-runs`),
-          fetch(`${API_BASE}/api/evaluation-pillars`),
-          fetch(`${API_BASE}/api/enterprise-readiness`)
-        ]);
+  async function load() {
+    try {
+      const [dashRes, agentsRes, runsRes, benchmarksRes, pillarsRes, readinessRes] = await Promise.all([
+        fetch(`${API_BASE}/api/dashboard`),
+        fetch(`${API_BASE}/api/agents`),
+        fetch(`${API_BASE}/api/evaluation-runs`),
+        fetch(`${API_BASE}/api/benchmarks`),
+        fetch(`${API_BASE}/api/evaluation-pillars`),
+        fetch(`${API_BASE}/api/enterprise-readiness`)
+      ]);
 
-        if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !pillarsRes.ok || !readinessRes.ok) {
-          throw new Error("Backend returned non-OK response");
-        }
-
-        setDashboard(await dashRes.json());
-        setAgents(await agentsRes.json());
-        setRuns(await runsRes.json());
-        setPillars(await pillarsRes.json());
-        setReadiness(await readinessRes.json());
-        setStatus("Live agent evaluation backend connected");
-      } catch {
-        setStatus("Backend connection failed. Demo shell loaded.");
+      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok) {
+        throw new Error("Backend returned non-OK response");
       }
+
+      const nextRuns = await runsRes.json();
+
+      setDashboard(await dashRes.json());
+      setAgents(await agentsRes.json());
+      setRuns(nextRuns);
+      setBenchmarks(await benchmarksRes.json());
+      setPillars(await pillarsRes.json());
+      setReadiness(await readinessRes.json());
+      setStatus("Live agent evaluation backend connected");
+
+      if (!selectedRun && nextRuns.length > 0) {
+        await loadRunDetail(nextRuns[0].run_id);
+      }
+    } catch {
+      setStatus("Backend connection failed. Demo shell loaded.");
+    }
+  }
+
+  async function loadRunDetail(runId) {
+    const res = await fetch(`${API_BASE}/api/evaluation-runs/${runId}`);
+    if (!res.ok) {
+      setRunStatus("Run detail fetch failed.");
+      return;
+    }
+    setSelectedRun(await res.json());
+  }
+
+  async function executeRun() {
+    setRunStatus("Running deterministic lab evaluation...");
+    const res = await fetch(`${API_BASE}/api/evaluation-runs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        agent_id: selectedAgentId,
+        benchmark_id: selectedBenchmarkId,
+        reviewer_note: "Phase 3 deterministic harness run."
+      })
+    });
+
+    if (!res.ok) {
+      setRunStatus("Evaluation run failed.");
+      return;
     }
 
+    const detail = await res.json();
+    setSelectedRun(detail);
+    setRunStatus(`Evaluation complete: ${detail.run.result.toUpperCase()} / ${detail.run.policy_decision}`);
+    await load();
+  }
+
+  useEffect(() => {
     load();
   }, []);
 
@@ -45,14 +92,14 @@ function App() {
     ? [
         ["Agent Trust", `${dashboard.agent_trust_score}/100`],
         ["Test Runs", dashboard.total_test_runs],
+        ["Benchmarks", dashboard.benchmark_count],
+        ["Evidence", dashboard.evidence_package_count],
         ["Pass Rate", `${dashboard.pass_rate}%`],
         ["Fail Rate", `${dashboard.fail_rate}%`],
         ["Hallucination", `${dashboard.hallucination_score}/3`],
         ["Tool Accuracy", `${dashboard.tool_call_accuracy}%`],
         ["Policy Score", `${dashboard.policy_compliance_score}%`],
-        ["Avg Cost", `$${dashboard.average_cost_per_run}`],
         ["Latency", `${dashboard.average_latency_ms}ms`],
-        ["Escalation", `${dashboard.human_escalation_rate}%`],
         ["Risk Tier", dashboard.highest_risk_tier]
       ]
     : [];
@@ -68,10 +115,10 @@ function App() {
             Evaluation infrastructure for testing, scoring, and verifying autonomous AI agents before and after deployment.
           </p>
           <div className="heroBadges">
-            <span>Before deployment</span>
-            <span>After deployment</span>
-            <span>CI eval gates</span>
-            <span>Evidence-first</span>
+            <span>Test Harness</span>
+            <span>Run Traceability</span>
+            <span>SOC 2 Evidence</span>
+            <span>Doctrine Safe</span>
           </div>
         </div>
 
@@ -89,7 +136,7 @@ function App() {
       <section className="shell">
         <h2 className="centerTitle">EVALUATION TRUST FABRIC</h2>
         <p className="centerSub">
-          Flagship evaluation layer for agent quality, safety, tool behavior, RAG grounding, policy compliance, and regression control.
+          Flagship evaluation layer for agent quality, safety, tool behavior, RAG grounding, policy compliance, regression control, and evidence traceability.
         </p>
         <div className="fabricGrid">
           {pillars.map((pillar) => (
@@ -104,42 +151,73 @@ function App() {
 
       <section className="metrics">
         {metricCards.map(([label, value]) => (
-          <div className={label === "Agent Trust" ? "metric trustMetric" : "metric"} key={label}>
+          <button
+            className={label === "Agent Trust" ? "metric trustMetric clickableMetric" : "metric clickableMetric"}
+            key={label}
+            onClick={() => runs[0] && loadRunDetail(runs[0].run_id)}
+          >
             <strong>{value}</strong>
             <span>{label}</span>
-          </div>
+          </button>
         ))}
       </section>
 
-      <section className="shell">
+      <section className="shell harnessPanel">
         <div className="sectionHeader">
           <div>
-            <p className="eyebrow">PHASE 2 · FLAGSHIP OPERATING MODEL</p>
-            <h2>Agent Evaluation Lifecycle</h2>
+            <p className="eyebrow">PHASE 3 · TEST HARNESS ENGINE</p>
+            <h2>Deterministic Agent Evaluation Harness</h2>
             <p>
-              A governed evaluation workflow for autonomous agents using prompts, tools, memory, retrieval, policy checks, and workflow automation.
+              Run lab-safe benchmark evaluations and drill down into the traceability record:
+              prompt, ground truth, retrieved context, tool calls, policy decision, scores, remediation, and evidence package.
             </p>
           </div>
           <div className="postureBox">
-            <span>Evaluation Posture</span>
-            <b>{status}</b>
+            <span>Harness Status</span>
+            <b>{runStatus}</b>
           </div>
         </div>
 
-        <div className="lifecycle">
-          {[
-            ["01", "Ground Truth", "Benchmark prompt, expected answer, policy, sources, and risk class."],
-            ["02", "Agent Run", "Agent produces output, retrieval context, memory reference, and tool path."],
-            ["03", "Score", "Hallucination, RAG grounding, tool accuracy, cost, latency, and policy compliance."],
-            ["04", "Validate", "Safety, memory, tenant, approval, and destructive-action boundaries are checked."],
-            ["05", "Detect Regression", "Compare against prior baselines for changed output, cost, risk, or failures."],
-            ["06", "Export Evidence", "Generate test run record, failure reason, remediation, and reviewer notes."]
-          ].map(([step, title, body]) => (
-            <div className="card lifecycleCard" key={step}>
-              <span className="step">{step}</span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </div>
+        <div className="harnessControls">
+          <label>
+            Agent
+            <select value={selectedAgentId} onChange={(event) => setSelectedAgentId(event.target.value)}>
+              {agents.map((agent) => (
+                <option key={agent.agent_id} value={agent.agent_id}>
+                  {agent.agent_name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Benchmark
+            <select value={selectedBenchmarkId} onChange={(event) => setSelectedBenchmarkId(event.target.value)}>
+              {benchmarks.map((benchmark) => (
+                <option key={benchmark.benchmark_id} value={benchmark.benchmark_id}>
+                  {benchmark.test_id}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button className="primaryButton" onClick={executeRun}>
+            Run Evaluation
+          </button>
+        </div>
+
+        <div className="benchmarkGrid">
+          {benchmarks.map((benchmark) => (
+            <button
+              key={benchmark.benchmark_id}
+              className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
+              onClick={() => setSelectedBenchmarkId(benchmark.benchmark_id)}
+            >
+              <h3>{benchmark.test_id}</h3>
+              <p>{benchmark.category}</p>
+              <p>Decision: <b>{benchmark.expected_policy_decision}</b></p>
+              <p>Risk: <b>{benchmark.risk_classification}</b></p>
+            </button>
           ))}
         </div>
       </section>
@@ -147,60 +225,110 @@ function App() {
       <section className="gridTwo">
         <div className="shell">
           <p className="eyebrow">COMMAND CENTER</p>
-          <h2>Agent Evaluation Runs</h2>
+          <h2>Evaluation Runs</h2>
           <p>{status}</p>
 
           <div className="stack">
             {runs.map((run) => (
-              <div className={`card ${run.result === "pass" ? "pass" : "fail"}`} key={run.run_id}>
+              <button
+                className={`card runCard ${run.result === "pass" ? "pass" : "fail"}`}
+                key={run.run_id}
+                onClick={() => loadRunDetail(run.run_id)}
+              >
                 <div className="row">
                   <h3>{run.test_name}</h3>
                   <span className="pill">{run.result.toUpperCase()}</span>
                 </div>
                 <p>{run.category}</p>
                 <p>Decision: <b>{run.policy_decision}</b></p>
-                <p>Policy score: <b>{run.policy_compliance_score}%</b> · Tool accuracy: <b>{run.tool_call_accuracy}%</b></p>
+                <p>Evidence: <b>{run.evidence_id}</b></p>
                 {run.failure_reason && <p className="failure">{run.failure_reason}</p>}
-              </div>
+              </button>
             ))}
           </div>
         </div>
 
-        <div className="shell">
-          <p className="eyebrow">AGENT INVENTORY</p>
-          <h2>Agents Under Evaluation</h2>
+        <div className="shell detailPanel">
+          <p className="eyebrow">RUN TRACEABILITY</p>
+          <h2>Evaluation Run Detail</h2>
 
-          <div className="stack">
-            {agents.map((agent) => (
-              <div className="card" key={agent.agent_id}>
-                <div className="row">
-                  <h3>{agent.agent_name}</h3>
-                  <span className="pill">{agent.risk_tier}</span>
+          {selectedRun ? (
+            <div>
+              <div className={`detailHeader ${selectedRun.run.result === "pass" ? "passBorder" : "failBorder"}`}>
+                <h3>{selectedRun.run.run_id}</h3>
+                <span className="pill">{selectedRun.run.result.toUpperCase()}</span>
+              </div>
+
+              <div className="tracePath">
+                {selectedRun.traceability_path.map((item) => (
+                  <span key={item}>{item.replaceAll("_", " ")}</span>
+                ))}
+              </div>
+
+              <div className="detailGrid">
+                <div className="card">
+                  <h3>Agent</h3>
+                  <p>{selectedRun.agent.agent_name}</p>
+                  <p>Owner: <b>{selectedRun.agent.owner}</b></p>
+                  <p>Risk: <b>{selectedRun.agent.risk_tier}</b></p>
                 </div>
-                <p>{agent.primary_capability}</p>
-                <p>Owner: <b>{agent.owner}</b></p>
-                <p>Status: <b>{agent.status}</b></p>
+
+                <div className="card">
+                  <h3>Benchmark</h3>
+                  <p>{selectedRun.benchmark.test_id}</p>
+                  <p>Risk: <b>{selectedRun.benchmark.risk_classification}</b></p>
+                  <p>Expected policy: <b>{selectedRun.benchmark.expected_policy_decision}</b></p>
+                </div>
+
+                <div className="card">
+                  <h3>Scores</h3>
+                  <p>Overall: <b>{selectedRun.run.overall_score}/100</b></p>
+                  <p>Hallucination: <b>{selectedRun.run.hallucination_score}/3</b></p>
+                  <p>Policy: <b>{selectedRun.run.policy_compliance_score}%</b></p>
+                  <p>Tool: <b>{selectedRun.run.tool_call_accuracy}%</b></p>
+                </div>
+
+                <div className="card">
+                  <h3>Evidence</h3>
+                  <p>{selectedRun.run.evidence_id}</p>
+                  <p>Policy decision: <b>{selectedRun.run.policy_decision}</b></p>
+                  <p>Score ID: <b>{selectedRun.run.score_id}</b></p>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section className="shell">
-        <p className="eyebrow">ENTERPRISE ESCALATION PATH</p>
-        <h2>Lab Today. Standalone Platform Ready.</h2>
-        <p>
-          Phase 2 keeps the product lab-safe while shaping the architecture toward an enterprise-grade evaluation platform.
-        </p>
+              <div className="card evidenceBox">
+                <h3>Prompt</h3>
+                <p>{selectedRun.run.prompt}</p>
+                <h3>Expected Answer</h3>
+                <p>{selectedRun.run.expected_answer}</p>
+                <h3>Actual Output</h3>
+                <p>{selectedRun.run.actual_output}</p>
+                <h3>Recommended Remediation</h3>
+                <p>{selectedRun.run.recommended_remediation}</p>
+              </div>
 
-        <div className="enterpriseGrid">
-          {readiness.map((item) => (
-            <div className="card" key={item.area}>
-              <h3>{item.area}</h3>
-              <p><b>Current:</b> {item.lab_state}</p>
-              <p><b>Enterprise path:</b> {item.enterprise_path}</p>
+              <div className="card evidenceBox">
+                <h3>Retrieved Context</h3>
+                {selectedRun.evidence.retrieved_context.map((ctx) => (
+                  <p key={ctx.source_id}>
+                    <b>{ctx.source_id}</b>: {ctx.summary}
+                  </p>
+                ))}
+                <h3>Tool Calls</h3>
+                {selectedRun.evidence.tool_calls.length === 0 ? (
+                  <p>No tool call expected for this benchmark.</p>
+                ) : (
+                  selectedRun.evidence.tool_calls.map((tool) => (
+                    <p key={tool.tool_name}>
+                      <b>{tool.tool_name}</b>: {tool.allowed ? "allowed" : "blocked"} — {tool.reason}
+                    </p>
+                  ))
+                )}
+              </div>
             </div>
-          ))}
+          ) : (
+            <p>Select a run to inspect traceability.</p>
+          )}
         </div>
       </section>
 
@@ -208,9 +336,8 @@ function App() {
         <p className="eyebrow">PLATFORM SOT & TRACEABILITY</p>
         <h2>State of Truth, Rollback & Drill-Down Foundation</h2>
         <p>
-          The Agent Evaluation Platform is designed for enterprise-grade traceability:
-          dashboard metrics should drill down into agents, test suites, benchmarks,
-          evaluation runs, policy decisions, scores, remediation, reviewer notes, and evidence packages.
+          Dashboard metrics now drill down into agents, benchmarks, evaluation runs, policy decisions,
+          scores, remediation, reviewer notes, and evidence packages.
         </p>
 
         <div className="traceGrid">
@@ -218,7 +345,7 @@ function App() {
             ["State of Truth", "Tracks phase, posture, doctrine boundary, SOC 2 readiness, and rollback state."],
             ["Rollback Points", "Stable tags preserve known-good baselines for recovery and audit history."],
             ["Traceability IDs", "Agents, suites, benchmarks, tests, runs, scores, decisions, evidence, and reviews get stable IDs."],
-            ["Evidence Drill-Down", "Metrics should reconstruct the prompt, context, tool calls, policy decision, score, and remediation."]
+            ["Evidence Drill-Down", "Metrics reconstruct prompt, context, tool calls, policy decision, score, and remediation."]
           ].map(([title, body]) => (
             <div className="card" key={title}>
               <h3>{title}</h3>
