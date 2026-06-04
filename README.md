@@ -195,3 +195,26 @@ Phase 5 endpoints:
 - `GET /api/scoring/hallucination/{run_id}`
 
 The scoring engine is lab-safe and deterministic. It does not call live LLMs, execute production agents, or perform production enforcement.
+
+## RAG Evaluation Suite
+
+The Phase 6 RAG Evaluation Suite adds deterministic retrieval and grounding analysis.
+
+It evaluates:
+
+- retrieval precision
+- retrieval recall
+- source relevance
+- chunk quality
+- citation accuracy
+- answer grounding
+- context contamination
+- sensitive source leakage
+- RAG evidence traceability
+
+Phase 6 endpoints:
+
+- `GET /api/rag/evaluations`
+- `GET /api/rag/evaluations/{run_id}`
+
+The RAG suite is lab-safe and deterministic. It does not connect to a live vector database, production RAG corpus, live LLM, production agent, or customer data source.

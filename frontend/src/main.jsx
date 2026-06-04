@@ -16,6 +16,7 @@ function App() {
   const [selectedBenchmarkId, setSelectedBenchmarkId] = useState("benchmark_regulatory_claim_grounding");
   const [status, setStatus] = useState("Loading agent evaluation telemetry...");
   const [hallucination, setHallucination] = useState(null);
+  const [rag, setRag] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -27,10 +28,11 @@ function App() {
         fetch(`${API_BASE}/api/benchmarks`),
         fetch(`${API_BASE}/api/evaluation-pillars`),
         fetch(`${API_BASE}/api/enterprise-readiness`),
-        fetch(`${API_BASE}/api/scoring/hallucination`)
+        fetch(`${API_BASE}/api/scoring/hallucination`),
+        fetch(`${API_BASE}/api/rag/evaluations`)
       ]);
 
-      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok) {
+      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok || !ragRes.ok) {
         throw new Error("Backend returned non-OK response");
       }
 
@@ -43,6 +45,7 @@ function App() {
       setPillars(await pillarsRes.json());
       setReadiness(await readinessRes.json());
       setHallucination(await hallucinationRes.json());
+      setRag(await ragRes.json());
       setStatus("Live agent evaluation backend connected");
 
       if (!selectedRun && nextRuns.length > 0) {
@@ -226,6 +229,68 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="shell ragPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 6 · RAG EVALUATION SUITE</p>
+            <h2>Retrieval Quality, Citation Accuracy & Grounding</h2>
+            <p>
+              The RAG Evaluation Suite checks retrieval precision, recall, source relevance,
+              chunk quality, citation accuracy, answer grounding, context contamination, and sensitive source leakage.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>RAG Evidence Trace</span>
+            <b>{rag ? `${rag.average_answer_grounding}% grounded` : "Loading"}</b>
+          </div>
+        </div>
+
+        {rag && (
+          <>
+            <div className="ragMetrics">
+              {[
+                ["Precision", `${rag.average_retrieval_precision}%`],
+                ["Recall", `${rag.average_retrieval_recall}%`],
+                ["Citation Accuracy", `${rag.average_citation_accuracy}%`],
+                ["Grounding", `${rag.average_answer_grounding}%`],
+                ["Contamination", rag.context_contamination_count],
+                ["Sensitive Leakage", rag.sensitive_source_leakage_count]
+              ].map(([label, value]) => (
+                <div className="metric" key={label}>
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="ragGrid">
+              {rag.evaluations.map((evaluation) => (
+                <button
+                  className={evaluation.context_contamination ? "card ragCard fail" : "card ragCard pass"}
+                  key={evaluation.rag_eval_id}
+                  onClick={() => loadRunDetail(evaluation.run_id)}
+                >
+                  <div className="row">
+                    <h3>{evaluation.rag_eval_id}</h3>
+                    <span className="pill">{evaluation.answer_grounding_score}%</span>
+                  </div>
+                  <p>Run: <b>{evaluation.run_id}</b></p>
+                  <p>Precision: <b>{evaluation.retrieval_precision}%</b> · Recall: <b>{evaluation.retrieval_recall}%</b></p>
+                  <p>Citation: <b>{evaluation.citation_accuracy}%</b> · Chunk quality: <b>{evaluation.chunk_quality_score}%</b></p>
+                  <p>Context contamination: <b>{evaluation.context_contamination ? "yes" : "no"}</b></p>
+                  <p>Sensitive leakage: <b>{evaluation.sensitive_source_leakage ? "yes" : "no"}</b></p>
+                  <p className="failure">{evaluation.remediation_guidance}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="drillPath">
+          <b>RAG trace:</b> Run → Benchmark → Sources → Retrieved Chunks → Citations → Grounding → Contamination → Evidence
         </div>
       </section>
 

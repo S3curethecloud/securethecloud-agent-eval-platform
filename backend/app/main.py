@@ -505,7 +505,7 @@ def health():
         "status": "ok",
         "service": "securethecloud-agent-eval-platform",
         "lab_mode": True,
-        "phase": "5",
+        "phase": "6",
     }
 
 
@@ -689,10 +689,10 @@ def soc2_readiness():
 def platform_sot():
     return {
         "platform": "SecureTheCloud Agent Evaluation Platform",
-        "current_phase": "Phase 5 — Hallucination Scoring Engine",
+        "current_phase": "Phase 6 — RAG Evaluation Suite",
         "current_posture": "lab_safe_evaluation_surface",
-        "latest_stable_baseline": "v0.5.0-hallucination-scoring-engine",
-        "next_planned_phase": "Phase 6 — RAG Evaluation Suite",
+        "latest_stable_baseline": "v0.6.0-rag-evaluation-suite",
+        "next_planned_phase": "Phase 7 — Tool-Call Verification",
         "doctrine_boundary": {
             "new_suite_membership": False,
             "enforcement_authority": False,
@@ -794,7 +794,7 @@ def ground_truth_store():
     return {
         "store_type": "ground_truth_benchmark_store",
         "platform": "SecureTheCloud Agent Evaluation Platform",
-        "phase": "5",
+        "phase": "6",
         "lab_safe": True,
         "production_agent_execution": False,
         "benchmark_count": len(BENCHMARKS),
@@ -979,7 +979,7 @@ def hallucination_scoring_index():
 
     return {
         "engine": "hallucination_scoring_engine",
-        "phase": "5",
+        "phase": "6",
         "lab_safe": True,
         "production_agent_execution": False,
         "live_llm_calls": False,
@@ -1034,5 +1034,164 @@ def hallucination_scoring_detail(run_id: str):
             "live_llm_call": False,
             "runtime_authority": False,
             "enforcement_authority": False,
+        },
+    }
+
+
+def rag_evaluation_for_run(run):
+    benchmark = find_benchmark(run["benchmark_id"])
+    if benchmark is None:
+        raise HTTPException(status_code=404, detail="Benchmark not found for RAG evaluation")
+
+    allowed_sources = benchmark["allowed_sources"]
+    forbidden_sources = benchmark["forbidden_sources"]
+    required_citation = benchmark["required_citation"]
+
+    if run["result"] == "pass":
+        retrieved_chunks = [
+            {
+                "chunk_id": f"chunk_{run['run_id']}_1",
+                "source_id": allowed_sources[0],
+                "relevance": "high",
+                "allowed": True,
+                "sensitive": False,
+                "summary": "Approved source chunk supporting the benchmark expected answer.",
+            },
+            {
+                "chunk_id": f"chunk_{run['run_id']}_2",
+                "source_id": allowed_sources[-1],
+                "relevance": "medium",
+                "allowed": True,
+                "sensitive": False,
+                "summary": "Secondary approved source chunk used for supporting context.",
+            },
+        ]
+        precision = 100
+        recall = 100
+        citation_accuracy = 100 if required_citation else 95
+        answer_grounding = 96
+        context_contamination = False
+        sensitive_source_leakage = False
+        remediation = "No remediation required. Retrieved context supports the answer."
+    else:
+        retrieved_chunks = [
+            {
+                "chunk_id": f"chunk_{run['run_id']}_1",
+                "source_id": allowed_sources[0] if allowed_sources else "unknown_allowed_source",
+                "relevance": "medium",
+                "allowed": True,
+                "sensitive": False,
+                "summary": "Partially relevant source chunk retrieved for the benchmark.",
+            },
+            {
+                "chunk_id": f"chunk_{run['run_id']}_2",
+                "source_id": forbidden_sources[0] if forbidden_sources else "unapproved_context",
+                "relevance": "low",
+                "allowed": False,
+                "sensitive": run.get("failure_type") in ["cross_session_memory_leakage", "excessive_context_handoff"],
+                "summary": "Forbidden or unapproved context detected in simulated retrieval.",
+            },
+        ]
+        precision = 50
+        recall = 60
+        citation_accuracy = 40 if required_citation else 70
+        answer_grounding = 45
+        context_contamination = True
+        sensitive_source_leakage = any(chunk["sensitive"] for chunk in retrieved_chunks)
+        remediation = "Restrict retrieval to allowed sources, remove forbidden context, and require citation-backed grounding."
+
+    source_relevance_score = round(
+        sum(100 if chunk["relevance"] == "high" else 70 if chunk["relevance"] == "medium" else 25 for chunk in retrieved_chunks)
+        / len(retrieved_chunks)
+    )
+
+    chunk_quality_score = max(0, round((precision + recall + source_relevance_score) / 3))
+
+    return {
+        "rag_eval_id": f"rag_eval_{run['run_id']}",
+        "run_id": run["run_id"],
+        "benchmark_id": run["benchmark_id"],
+        "agent_id": run["agent_id"],
+        "retrieval_precision": precision,
+        "retrieval_recall": recall,
+        "source_relevance_score": source_relevance_score,
+        "chunk_quality_score": chunk_quality_score,
+        "citation_accuracy": citation_accuracy,
+        "answer_grounding_score": answer_grounding,
+        "context_contamination": context_contamination,
+        "sensitive_source_leakage": sensitive_source_leakage,
+        "retrieved_chunks": retrieved_chunks,
+        "allowed_sources": allowed_sources,
+        "forbidden_sources": forbidden_sources,
+        "required_citation": required_citation,
+        "remediation_guidance": remediation,
+        "soc2_trace_areas": ["Processing Integrity", "Confidentiality", "Privacy"],
+        "doctrine_boundary": {
+            "simulated_rag_evaluation_only": True,
+            "live_vector_database": False,
+            "production_rag_corpus": False,
+            "customer_data": False,
+            "patient_data": False,
+            "live_llm_call": False,
+            "production_agent_execution": False,
+            "runtime_authority": False,
+            "enforcement_authority": False,
+        },
+    }
+
+
+@app.get("/api/rag/evaluations")
+def rag_evaluation_index():
+    evaluations = [rag_evaluation_for_run(run) for run in EVALUATION_RUNS]
+    count = len(evaluations)
+
+    return {
+        "suite": "rag_evaluation_suite",
+        "phase": "6",
+        "lab_safe": True,
+        "live_vector_database": False,
+        "production_rag_corpus": False,
+        "evaluation_count": count,
+        "average_retrieval_precision": round(sum(item["retrieval_precision"] for item in evaluations) / count) if count else 0,
+        "average_retrieval_recall": round(sum(item["retrieval_recall"] for item in evaluations) / count) if count else 0,
+        "average_citation_accuracy": round(sum(item["citation_accuracy"] for item in evaluations) / count) if count else 0,
+        "average_answer_grounding": round(sum(item["answer_grounding_score"] for item in evaluations) / count) if count else 0,
+        "context_contamination_count": sum(1 for item in evaluations if item["context_contamination"]),
+        "sensitive_source_leakage_count": sum(1 for item in evaluations if item["sensitive_source_leakage"]),
+        "soc2_trace_areas": ["Processing Integrity", "Confidentiality", "Privacy"],
+        "evaluations": evaluations,
+    }
+
+
+@app.get("/api/rag/evaluations/{run_id}")
+def rag_evaluation_detail(run_id: str):
+    run = next((item for item in EVALUATION_RUNS if item["run_id"] == run_id), None)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Evaluation run not found")
+
+    benchmark = find_benchmark(run["benchmark_id"])
+    evaluation = rag_evaluation_for_run(run)
+
+    return {
+        "evaluation": evaluation,
+        "run": run,
+        "benchmark": benchmark,
+        "traceability_path": [
+            "evaluation_run",
+            "benchmark",
+            "allowed_sources",
+            "forbidden_sources",
+            "retrieved_chunks",
+            "citations",
+            "answer_grounding",
+            "context_contamination",
+            "sensitive_source_leakage",
+            "rag_evidence_record",
+        ],
+        "soc2_alignment": {
+            "trust_service_areas": ["Processing Integrity", "Confidentiality", "Privacy"],
+            "readiness_evidence_only": True,
+            "soc2_certification_claimed": False,
+            "production_operating_effectiveness_claimed": False,
         },
     }

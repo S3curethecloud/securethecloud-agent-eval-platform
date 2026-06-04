@@ -56,3 +56,5 @@ Current platform is lab-safe and does not contain production runtime state.
 | v0.4.0-ground-truth-benchmark-store | Ground Truth Benchmark Store | Adds traceable benchmark management and source/policy expectations |
 
 | v0.5.0-hallucination-scoring-engine | Hallucination Scoring Engine | Adds claim-level grounding, unsupported claim detection, and SOC 2 Processing Integrity traceability |
+
+| v0.6.0-rag-evaluation-suite | RAG Evaluation Suite | Adds retrieval precision, citation accuracy, grounding, contamination, and leakage evidence |
