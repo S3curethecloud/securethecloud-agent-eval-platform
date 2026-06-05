@@ -25,8 +25,11 @@ from app.models import (
     EvaluationRunnerJobRecord,
     EnterprisePreviewDeploymentBoundaryRecord,
     DeploymentHealthCheckRecord,
+    AIChaosScenarioRecord,
+    AIChaosSimulationPlanRecord,
+    AIChaosEvidenceReferenceRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary, seed_enterprise_preview_deployment_boundary
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary, seed_enterprise_preview_deployment_boundary, seed_ai_chaos_harness_planning_surface
 from pydantic import BaseModel
 
 
@@ -48,6 +51,7 @@ def startup_persistent_evidence_store():
         seed_evidence_package_reviewer_workspace(db)
         seed_queue_backed_evaluation_runner_boundary(db)
         seed_enterprise_preview_deployment_boundary(db)
+        seed_ai_chaos_harness_planning_surface(db)
     finally:
         db.close()
 
@@ -2839,5 +2843,102 @@ def get_deployment_health_checks(db: Session = Depends(get_db)):
                 "soc2_mapping": check.soc2_mapping,
             }
             for check in checks
+        ],
+    }
+
+
+@app.get("/api/v1/ai-chaos/scenarios")
+def get_ai_chaos_scenarios(db: Session = Depends(get_db)):
+    scenarios = db.query(AIChaosScenarioRecord).all()
+
+    return {
+        "phase": "19",
+        "foundation_status": "FOUNDATION_ADDED",
+        "execution_posture": "PLANNING_ONLY_NO_EXECUTION",
+        "scenario_count": len(scenarios),
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "live_autonomous_execution": "not_active",
+        "runtime_mutation": "not_granted",
+        "scenarios": [
+            {
+                "scenario_id": s.scenario_id,
+                "tenant_id": s.tenant_id,
+                "workspace_id": s.workspace_id,
+                "scenario_name": s.scenario_name,
+                "scenario_category": s.scenario_category,
+                "target_surface": s.target_surface,
+                "non_production_scope": s.non_production_scope,
+                "blast_radius": s.blast_radius,
+                "expected_resilience_signal": s.expected_resilience_signal,
+                "policy_candidate_output": s.policy_candidate_output,
+                "black_box_reference_posture": s.black_box_reference_posture,
+                "riskdna_reference_posture": s.riskdna_reference_posture,
+                "execution_posture": s.execution_posture,
+                "approval_required": s.approval_required,
+                "boundary_statement": s.boundary_statement,
+                "soc2_mapping": s.soc2_mapping,
+            }
+            for s in scenarios
+        ],
+    }
+
+
+@app.get("/api/v1/ai-chaos/plans")
+def get_ai_chaos_simulation_plans(db: Session = Depends(get_db)):
+    plans = db.query(AIChaosSimulationPlanRecord).all()
+
+    return {
+        "phase": "19",
+        "foundation_status": "FOUNDATION_ADDED",
+        "plan_count": len(plans),
+        "run_mode": "offline_planning_only",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "live_autonomous_execution": "not_active",
+        "plans": [
+            {
+                "simulation_plan_id": plan.simulation_plan_id,
+                "scenario_id": plan.scenario_id,
+                "tenant_id": plan.tenant_id,
+                "workspace_id": plan.workspace_id,
+                "planning_status": plan.planning_status,
+                "run_mode": plan.run_mode,
+                "preconditions": plan.preconditions,
+                "blocked_actions": plan.blocked_actions,
+                "required_approvals": plan.required_approvals,
+                "expected_evidence": plan.expected_evidence,
+                "governance_handoff": plan.governance_handoff,
+                "true_mode": plan.true_mode,
+                "production_authority": plan.production_authority,
+                "live_autonomous_execution": plan.live_autonomous_execution,
+            }
+            for plan in plans
+        ],
+    }
+
+
+@app.get("/api/v1/ai-chaos/evidence-references")
+def get_ai_chaos_evidence_references(db: Session = Depends(get_db)):
+    references = db.query(AIChaosEvidenceReferenceRecord).all()
+
+    return {
+        "phase": "19",
+        "foundation_status": "FOUNDATION_ADDED",
+        "reference_count": len(references),
+        "custody_bypass": "not_allowed",
+        "policy_mutation": "not_granted",
+        "references": [
+            {
+                "evidence_reference_id": ref.evidence_reference_id,
+                "scenario_id": ref.scenario_id,
+                "reference_type": ref.reference_type,
+                "reference_target": ref.reference_target,
+                "reference_posture": ref.reference_posture,
+                "custody_boundary": ref.custody_boundary,
+                "mutation_authority": ref.mutation_authority,
+                "notes": ref.notes,
+            }
+            for ref in references
         ],
     }

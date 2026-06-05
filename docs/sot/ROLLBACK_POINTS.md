@@ -173,3 +173,17 @@ Restores:
 - forbidden public claims
 - frontend doctrine-safe public positioning panel
 - AI Chaos Harness support-lane public language
+
+
+## v0.19.0-ai-chaos-harness-planning-surface
+
+Phase 19 rollback point for AI Chaos Harness planning surface.
+
+Restores:
+
+- AI Chaos scenario records
+- AI Chaos simulation plan records
+- AI Chaos evidence reference records
+- planning-only adversarial scenario boundary
+- frontend AI Chaos Harness planning panel
+- doctrine-safe no-runtime/no-production boundary

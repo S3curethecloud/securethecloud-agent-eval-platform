@@ -33,6 +33,9 @@ function App() {
   const [runnerJobs, setRunnerJobs] = useState(null);
   const [deploymentBoundary, setDeploymentBoundary] = useState(null);
   const [deploymentHealthChecks, setDeploymentHealthChecks] = useState(null);
+  const [aiChaosScenarios, setAiChaosScenarios] = useState(null);
+  const [aiChaosPlans, setAiChaosPlans] = useState(null);
+  const [aiChaosReferences, setAiChaosReferences] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -320,6 +323,36 @@ function App() {
     };
 
     hydrateDeploymentBoundary();
+  }, []);
+
+
+  // phase19AIChaosHarnessIndependentHydration
+  useEffect(() => {
+    const hydrateAIChaosHarness = async () => {
+      try {
+        const [scenarioResponse, planResponse, referenceResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/ai-chaos/scenarios`),
+          fetch(`${API_BASE}/api/v1/ai-chaos/plans`),
+          fetch(`${API_BASE}/api/v1/ai-chaos/evidence-references`)
+        ]);
+
+        if (scenarioResponse.ok) {
+          setAiChaosScenarios(await scenarioResponse.json());
+        }
+
+        if (planResponse.ok) {
+          setAiChaosPlans(await planResponse.json());
+        }
+
+        if (referenceResponse.ok) {
+          setAiChaosReferences(await referenceResponse.json());
+        }
+      } catch (error) {
+        console.warn("Phase 19 AI Chaos Harness hydration failed", error);
+      }
+    };
+
+    hydrateAIChaosHarness();
   }, []);
 
   return (
@@ -1102,7 +1135,76 @@ function App() {
 
 
 
-      <section className="shell phase18Panel">
+
+      <section className="shell phase19Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 19 - AI Chaos Harness Planning Surface</p>
+            <h2>Adversarial Scenario Planning, Resilience Evidence & Policy Candidate Handoff</h2>
+            <p>
+              The AI Chaos Harness planning surface defines non-production adversarial scenarios,
+              simulation plans, expected resilience signals, policy candidate outputs, Black Box
+              replay references, and RiskDNA feedback references. This is planning-only: no live
+              autonomous execution, production traffic, runtime mutation, or TRUE_MODE activation is active.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>AI Chaos Harness</span>
+            <b>{aiChaosScenarios?.execution_posture || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard ledgerMetricCard">
+            <b>{aiChaosScenarios?.scenario_count ?? 0}</b>
+            <span>Scenarios</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{aiChaosPlans?.plan_count ?? 0}</b>
+            <span>Simulation Plans</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{aiChaosReferences?.reference_count ?? 0}</b>
+            <span>Evidence References</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{aiChaosScenarios?.production_authority || "not_granted"}</b>
+            <span>Production Authority</span>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>AI Chaos Harness Boundary</h3>
+          <p>
+            Scenario records are planning-only and may produce offline findings, resilience evidence,
+            and policy candidates. They do not mutate Aegis/OPA/SENTINEL, bypass Black Box custody,
+            run uncontrolled adversarial traffic, or execute production agent tools.
+          </p>
+        </div>
+
+        <div className="ledgerGrid">
+          {(aiChaosScenarios?.scenarios || []).map((scenario) => (
+            <div className="card ledgerCard" key={scenario.scenario_id}>
+              <div className="cardTitleRow">
+                <h3>{scenario.scenario_name}</h3>
+                <span className="pill good">{scenario.execution_posture}</span>
+              </div>
+              <p>Category: <b>{scenario.scenario_category}</b></p>
+              <p>Target: <b>{scenario.target_surface}</b></p>
+              <p>Blast radius: <b>{scenario.blast_radius}</b></p>
+              <p>Policy candidate: <b>{scenario.policy_candidate_output}</b></p>
+              <p>Approval required: <b>{scenario.approval_required ? "yes" : "no"}</b></p>
+              <p className="remediation">{scenario.expected_resilience_signal}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          AI Chaos trace: Scenario → Simulation Plan → Non-Production Scope → Expected Resilience Signal → Evidence Reference → Policy Candidate → Governance Handoff
+        </div>
+      </section>
+
+<section className="shell phase18Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 18 - Enterprise Preview Website & Doctrine-Safe Public Positioning</p>

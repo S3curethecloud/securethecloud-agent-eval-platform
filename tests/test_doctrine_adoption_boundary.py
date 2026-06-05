@@ -86,3 +86,23 @@ def test_portfolio_fit_baseline_blocks_forbidden_claims():
 
     for claim in forbidden_claims:
         assert claim in baseline
+
+
+def test_ai_chaos_planning_surface_preserves_non_runtime_boundary():
+    from pathlib import Path
+
+    doc = Path("docs/chaos/AI_CHAOS_HARNESS_PLANNING_SURFACE.md").read_text()
+
+    required_phrases = [
+        "planning-only",
+        "No live autonomous execution is active.",
+        "No production traffic is mutated.",
+        "No runtime policy is mutated.",
+        "No Aegis/OPA/SENTINEL policy is updated.",
+        "No SENTINEL bypass is allowed.",
+        "No Agent Black Box custody bypass is allowed.",
+        "No TRUE_MODE activation is active.",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in doc

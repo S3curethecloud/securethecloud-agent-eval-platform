@@ -319,3 +319,59 @@ class DeploymentHealthCheckRecord(Base):
     failure_action = Column(String(200), nullable=False)
     soc2_mapping = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AIChaosScenarioRecord(Base):
+    __tablename__ = "ai_chaos_scenario_records"
+
+    scenario_id = Column(String(160), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    scenario_name = Column(String(200), nullable=False)
+    scenario_category = Column(String(120), nullable=False)
+    target_surface = Column(String(160), nullable=False)
+    non_production_scope = Column(Boolean, default=True, nullable=False)
+    blast_radius = Column(String(120), nullable=False)
+    expected_resilience_signal = Column(String(240), nullable=False)
+    policy_candidate_output = Column(String(240), nullable=False)
+    black_box_reference_posture = Column(String(160), nullable=False)
+    riskdna_reference_posture = Column(String(160), nullable=False)
+    execution_posture = Column(String(160), nullable=False)
+    approval_required = Column(Boolean, default=True, nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AIChaosSimulationPlanRecord(Base):
+    __tablename__ = "ai_chaos_simulation_plan_records"
+
+    simulation_plan_id = Column(String(160), primary_key=True, index=True)
+    scenario_id = Column(String(160), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    planning_status = Column(String(120), nullable=False)
+    run_mode = Column(String(120), nullable=False)
+    preconditions = Column(JSON, default=list, nullable=False)
+    blocked_actions = Column(JSON, default=list, nullable=False)
+    required_approvals = Column(JSON, default=list, nullable=False)
+    expected_evidence = Column(JSON, default=list, nullable=False)
+    governance_handoff = Column(String(200), nullable=False)
+    true_mode = Column(String(80), nullable=False)
+    production_authority = Column(String(80), nullable=False)
+    live_autonomous_execution = Column(String(80), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AIChaosEvidenceReferenceRecord(Base):
+    __tablename__ = "ai_chaos_evidence_reference_records"
+
+    evidence_reference_id = Column(String(160), primary_key=True, index=True)
+    scenario_id = Column(String(160), index=True, nullable=False)
+    reference_type = Column(String(120), nullable=False)
+    reference_target = Column(String(200), nullable=False)
+    reference_posture = Column(String(160), nullable=False)
+    custody_boundary = Column(String(200), nullable=False)
+    mutation_authority = Column(String(120), nullable=False)
+    notes = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

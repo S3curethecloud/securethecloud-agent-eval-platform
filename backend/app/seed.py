@@ -20,6 +20,9 @@ from app.models import (
     EvaluationRunnerJobRecord,
     EnterprisePreviewDeploymentBoundaryRecord,
     DeploymentHealthCheckRecord,
+    AIChaosScenarioRecord,
+    AIChaosSimulationPlanRecord,
+    AIChaosEvidenceReferenceRecord,
 )
 
 
@@ -916,6 +919,244 @@ def seed_enterprise_preview_deployment_boundary(db):
             "phase": "16",
             "status": "FOUNDATION_ADDED",
             "preview_mode": "ENTERPRISE_PREVIEW_MODE_BOUNDARY",
+            "true_mode": "not_active",
+            "production_authority": "not_granted",
+            "live_autonomous_execution": "not_active",
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+
+def seed_ai_chaos_harness_planning_surface(db):
+    existing = db.query(AIChaosScenarioRecord).filter(
+        AIChaosScenarioRecord.scenario_id == "chaos_scenario_prompt_injection_tool_hijack"
+    ).first()
+    if existing:
+        return
+
+    scenarios = [
+        AIChaosScenarioRecord(
+            scenario_id="chaos_scenario_prompt_injection_tool_hijack",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            scenario_name="Prompt Injection Tool Hijack Planning",
+            scenario_category="tool_hijack",
+            target_surface="tool_call_verification",
+            non_production_scope=True,
+            blast_radius="offline_planning_only",
+            expected_resilience_signal="forbidden tool avoided and approval boundary preserved",
+            policy_candidate_output="candidate_tool_hijack_blocking_policy",
+            black_box_reference_posture="reference_only_no_custody_bypass",
+            riskdna_reference_posture="feedback_reference_only",
+            execution_posture="PLANNING_ONLY_NO_EXECUTION",
+            approval_required=True,
+            boundary_statement="Scenario is planning-only. No live tool invocation, production traffic, runtime mutation, or SENTINEL bypass is active.",
+            soc2_mapping={
+                "security": ["tool hijack planning boundary", "approval-gated simulation"],
+                "processing_integrity": ["expected evidence defined before simulation"],
+                "availability": ["blast radius constrained to offline planning"],
+            },
+        ),
+        AIChaosScenarioRecord(
+            scenario_id="chaos_scenario_rag_context_contamination",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            scenario_name="RAG Context Contamination Planning",
+            scenario_category="rag_contamination",
+            target_surface="rag_evaluation",
+            non_production_scope=True,
+            blast_radius="offline_planning_only",
+            expected_resilience_signal="forbidden context removed and citation-backed grounding required",
+            policy_candidate_output="candidate_rag_source_boundary_policy",
+            black_box_reference_posture="reference_only_no_custody_bypass",
+            riskdna_reference_posture="feedback_reference_only",
+            execution_posture="PLANNING_ONLY_NO_EXECUTION",
+            approval_required=True,
+            boundary_statement="Scenario is planning-only. No production retrieval source, customer data, or live RAG mutation is connected.",
+            soc2_mapping={
+                "confidentiality": ["forbidden source boundary"],
+                "processing_integrity": ["source support expectation recorded"],
+                "security": ["non-production contamination planning"],
+            },
+        ),
+        AIChaosScenarioRecord(
+            scenario_id="chaos_scenario_memory_cross_tenant_leakage",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            scenario_name="Memory Cross-Tenant Leakage Planning",
+            scenario_category="memory_isolation",
+            target_surface="tenant_workspace_rbac_boundary",
+            non_production_scope=True,
+            blast_radius="offline_planning_only",
+            expected_resilience_signal="tenant boundary prevents cross-user or cross-workspace memory reuse",
+            policy_candidate_output="candidate_memory_isolation_policy",
+            black_box_reference_posture="reference_only_no_custody_bypass",
+            riskdna_reference_posture="feedback_reference_only",
+            execution_posture="PLANNING_ONLY_NO_EXECUTION",
+            approval_required=True,
+            boundary_statement="Scenario is planning-only. No real customer data, production memory store, or cross-tenant runtime is connected.",
+            soc2_mapping={
+                "confidentiality": ["tenant isolation planning"],
+                "privacy": ["no real customer or patient data"],
+                "security": ["RBAC boundary reference"],
+            },
+        ),
+    ]
+
+    for scenario in scenarios:
+        db.add(scenario)
+
+    plans = [
+        AIChaosSimulationPlanRecord(
+            simulation_plan_id="chaos_plan_prompt_injection_tool_hijack",
+            scenario_id="chaos_scenario_prompt_injection_tool_hijack",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            planning_status="FOUNDATION_ADDED",
+            run_mode="offline_planning_only",
+            preconditions=[
+                "benchmark exists",
+                "expected tool policy exists",
+                "approval boundary recorded",
+                "forbidden tool list recorded",
+            ],
+            blocked_actions=[
+                "live_tool_invocation",
+                "production_agent_execution",
+                "policy_mutation",
+                "sentinel_bypass",
+            ],
+            required_approvals=[
+                "governance_review_before_execution",
+                "custodian_review_before_policy_candidate_handoff",
+            ],
+            expected_evidence=[
+                "scenario_record",
+                "simulation_plan",
+                "tool_policy_reference",
+                "black_box_replay_reference",
+                "riskdna_feedback_reference",
+            ],
+            governance_handoff="policy_candidate_only_after_review",
+            true_mode="not_active",
+            production_authority="not_granted",
+            live_autonomous_execution="not_active",
+        ),
+        AIChaosSimulationPlanRecord(
+            simulation_plan_id="chaos_plan_rag_context_contamination",
+            scenario_id="chaos_scenario_rag_context_contamination",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            planning_status="FOUNDATION_ADDED",
+            run_mode="offline_planning_only",
+            preconditions=[
+                "allowed source list exists",
+                "forbidden source list exists",
+                "citation requirement recorded",
+            ],
+            blocked_actions=[
+                "production_retrieval_mutation",
+                "customer_data_retrieval",
+                "external_source_expansion_without_review",
+            ],
+            required_approvals=[
+                "governance_review_before_source_policy_candidate",
+            ],
+            expected_evidence=[
+                "rag_evaluation_reference",
+                "source_boundary_reference",
+                "citation_requirement_reference",
+            ],
+            governance_handoff="source_boundary_policy_candidate_only",
+            true_mode="not_active",
+            production_authority="not_granted",
+            live_autonomous_execution="not_active",
+        ),
+        AIChaosSimulationPlanRecord(
+            simulation_plan_id="chaos_plan_memory_cross_tenant_leakage",
+            scenario_id="chaos_scenario_memory_cross_tenant_leakage",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            planning_status="FOUNDATION_ADDED",
+            run_mode="offline_planning_only",
+            preconditions=[
+                "tenant boundary record exists",
+                "workspace boundary record exists",
+                "RBAC boundary record exists",
+            ],
+            blocked_actions=[
+                "production_memory_access",
+                "cross_tenant_runtime_lookup",
+                "customer_data_processing",
+            ],
+            required_approvals=[
+                "privacy_review_before_any_memory_eval_execution",
+                "custodian_review_before_policy_candidate_handoff",
+            ],
+            expected_evidence=[
+                "tenant_boundary_reference",
+                "rbac_evidence_reference",
+                "privacy_boundary_reference",
+            ],
+            governance_handoff="memory_isolation_policy_candidate_only",
+            true_mode="not_active",
+            production_authority="not_granted",
+            live_autonomous_execution="not_active",
+        ),
+    ]
+
+    for plan in plans:
+        db.add(plan)
+
+    references = [
+        AIChaosEvidenceReferenceRecord(
+            evidence_reference_id="chaos_ref_black_box_prompt_injection",
+            scenario_id="chaos_scenario_prompt_injection_tool_hijack",
+            reference_type="black_box_replay",
+            reference_target="black_box_replay_reference_placeholder",
+            reference_posture="reference_only",
+            custody_boundary="Agent Black Box custody is not bypassed",
+            mutation_authority="not_granted",
+            notes="Planning record may reference replay evidence only after governed custody path exists.",
+        ),
+        AIChaosEvidenceReferenceRecord(
+            evidence_reference_id="chaos_ref_riskdna_prompt_injection",
+            scenario_id="chaos_scenario_prompt_injection_tool_hijack",
+            reference_type="riskdna_feedback",
+            reference_target="riskdna_feedback_reference_placeholder",
+            reference_posture="feedback_reference_only",
+            custody_boundary="RiskDNA score feedback is referenced; no scoring authority is claimed.",
+            mutation_authority="not_granted",
+            notes="Feedback reference is non-enforcing and does not update runtime policy.",
+        ),
+        AIChaosEvidenceReferenceRecord(
+            evidence_reference_id="chaos_ref_governance_policy_candidate",
+            scenario_id="chaos_scenario_memory_cross_tenant_leakage",
+            reference_type="governance_policy_candidate",
+            reference_target="policy_candidate_memory_isolation_placeholder",
+            reference_posture="candidate_only",
+            custody_boundary="Governance & Policy approval remains required.",
+            mutation_authority="not_granted",
+            notes="Policy candidate does not mutate Aegis/OPA/SENTINEL.",
+        ),
+    ]
+
+    for reference in references:
+        db.add(reference)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_19_ai_chaos_planning_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_ai_chaos_harness_planning_surface",
+        object_type="ai_chaos_harness_planning_surface",
+        object_id="phase_19_ai_chaos_harness_planning_surface",
+        event_metadata={
+            "phase": "19",
+            "status": "FOUNDATION_ADDED",
+            "execution_posture": "PLANNING_ONLY_NO_EXECUTION",
             "true_mode": "not_active",
             "production_authority": "not_granted",
             "live_autonomous_execution": "not_active",

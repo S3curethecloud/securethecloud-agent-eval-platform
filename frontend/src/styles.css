@@ -1096,3 +1096,12 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+
+.phase19Panel {
+  border-color: #ff5fd2;
+  background:
+    radial-gradient(circle at top left, rgba(255, 95, 210, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(255, 190, 40, 0.08), transparent 34%),
+    rgba(30, 12, 36, 0.82);
+}

@@ -106,3 +106,5 @@ TRUE_MODE remains inactive.
 - portfolio fit doctrine reconciliation
 
 - enterprise preview website doctrine-safe positioning
+
+- AI Chaos Harness planning surface
