@@ -18,6 +18,8 @@ from app.models import (
     EvidenceExportManifestRecord,
     EvaluationRunnerQueueRecord,
     EvaluationRunnerJobRecord,
+    EnterprisePreviewDeploymentBoundaryRecord,
+    DeploymentHealthCheckRecord,
 )
 
 
@@ -769,6 +771,154 @@ def seed_queue_backed_evaluation_runner_boundary(db):
             "runner_mode": "QUEUE_BACKED_SIMULATED",
             "true_mode": "not_active",
             "external_worker_system": "not_active",
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+
+def seed_enterprise_preview_deployment_boundary(db):
+    existing = db.query(EnterprisePreviewDeploymentBoundaryRecord).filter(
+        EnterprisePreviewDeploymentBoundaryRecord.deployment_boundary_id == "deployment_boundary_phase_16_enterprise_preview"
+    ).first()
+    if existing:
+        return
+
+    boundary = EnterprisePreviewDeploymentBoundaryRecord(
+        deployment_boundary_id="deployment_boundary_phase_16_enterprise_preview",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        preview_mode="ENTERPRISE_PREVIEW_MODE_BOUNDARY",
+        frontend_preview_posture="CLOUDFLARE_PAGES_PREVIEW_READY",
+        target_preview_domain="agent-eval.securethecloud.dev",
+        api_origin_posture="ENVIRONMENT_GATED_BACKEND_API_ORIGIN",
+        api_origin_candidate="https://agent-eval-api.securethecloud.dev",
+        cors_posture="RESTRICTED_PREVIEW_ORIGINS_REQUIRED",
+        environment_posture="PREVIEW_ENVIRONMENT_VARIABLES_REQUIRED",
+        health_check_posture="PREVIEW_HEALTH_CHECKS_DEFINED",
+        deployment_authority="preview_boundary_defined_only",
+        true_mode="not_active",
+        production_authority="not_granted",
+        live_autonomous_execution="not_active",
+        boundary_statement="Enterprise preview deployment boundary is defined for Cloudflare readiness only. No TRUE_MODE activation, production authority, live autonomous execution, production agent tool use, or customer data processing is active.",
+        required_environment_variables=[
+            "VITE_API_BASE_URL",
+            "DATABASE_URL",
+            "APP_MODE",
+            "TRUE_MODE_ENABLED=false",
+            "ALLOWED_PREVIEW_ORIGINS",
+            "EVIDENCE_EXPORT_SIGNING_ENABLED=false",
+        ],
+        cors_expectations={
+            "allowed_origins": [
+                "https://agent-eval.securethecloud.dev",
+                "https://securethecloud-agent-eval-platform.pages.dev",
+            ],
+            "blocked_origins": ["*", "unregistered_customer_domains"],
+            "credential_posture": "restricted_preview_only",
+        },
+        health_checks=[
+            "/health",
+            "/api/v1/persistence/status",
+            "/api/v1/tenancy/status",
+            "/api/v1/evaluation-runner/queue",
+            "/api/v1/deployment/enterprise-preview",
+        ],
+        soc2_mapping={
+            "security": [
+                "restricted CORS boundary",
+                "environment-gated API origin",
+                "no production authority",
+            ],
+            "availability": [
+                "preview health checks defined",
+                "frontend and backend readiness checkpoints",
+            ],
+            "processing_integrity": [
+                "deployment state traceability",
+                "mode boundary evidence",
+            ],
+        },
+    )
+
+    checks = [
+        DeploymentHealthCheckRecord(
+            deployment_health_check_id="deploy_check_phase_16_health",
+            deployment_boundary_id="deployment_boundary_phase_16_enterprise_preview",
+            check_name="Backend health endpoint",
+            check_type="backend_health",
+            expected_result="200 OK",
+            current_status="DEFINED",
+            endpoint_or_surface="/health",
+            failure_action="block_preview_promotion",
+            soc2_mapping={
+                "availability": ["backend health visible before preview"],
+                "processing_integrity": ["deployment readiness check recorded"],
+            },
+        ),
+        DeploymentHealthCheckRecord(
+            deployment_health_check_id="deploy_check_phase_16_persistence",
+            deployment_boundary_id="deployment_boundary_phase_16_enterprise_preview",
+            check_name="Persistence foundation status",
+            check_type="persistence_status",
+            expected_result="FOUNDATION_ADDED",
+            current_status="DEFINED",
+            endpoint_or_surface="/api/v1/persistence/status",
+            failure_action="block_preview_promotion",
+            soc2_mapping={
+                "availability": ["persistent store readiness visible"],
+                "processing_integrity": ["data foundation status recorded"],
+            },
+        ),
+        DeploymentHealthCheckRecord(
+            deployment_health_check_id="deploy_check_phase_16_tenancy",
+            deployment_boundary_id="deployment_boundary_phase_16_enterprise_preview",
+            check_name="Tenant boundary status",
+            check_type="tenant_boundary",
+            expected_result="tenant_scoped",
+            current_status="DEFINED",
+            endpoint_or_surface="/api/v1/tenancy/status",
+            failure_action="block_preview_promotion",
+            soc2_mapping={
+                "security": ["tenant boundary checked before preview"],
+                "confidentiality": ["workspace scope checked before preview"],
+            },
+        ),
+        DeploymentHealthCheckRecord(
+            deployment_health_check_id="deploy_check_phase_16_runner",
+            deployment_boundary_id="deployment_boundary_phase_16_enterprise_preview",
+            check_name="Runner queue boundary",
+            check_type="runner_boundary",
+            expected_result="QUEUE_BACKED_SIMULATED",
+            current_status="DEFINED",
+            endpoint_or_surface="/api/v1/evaluation-runner/queue",
+            failure_action="block_preview_promotion",
+            soc2_mapping={
+                "availability": ["runner queue posture checked"],
+                "processing_integrity": ["runner mode boundary checked"],
+            },
+        ),
+    ]
+
+    db.add(boundary)
+    for check in checks:
+        db.add(check)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_16_enterprise_preview_boundary_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_enterprise_preview_deployment_boundary",
+        object_type="enterprise_preview_deployment_boundary",
+        object_id="deployment_boundary_phase_16_enterprise_preview",
+        event_metadata={
+            "phase": "16",
+            "status": "FOUNDATION_ADDED",
+            "preview_mode": "ENTERPRISE_PREVIEW_MODE_BOUNDARY",
+            "true_mode": "not_active",
+            "production_authority": "not_granted",
+            "live_autonomous_execution": "not_active",
         },
     )
     db.add(audit)

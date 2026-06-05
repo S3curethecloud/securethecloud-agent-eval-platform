@@ -132,3 +132,18 @@ Restores:
 - cost budget boundary
 - worker isolation posture
 - frontend Queue-Backed Runner panel
+
+
+## v0.16.0-enterprise-preview-deployment-boundary
+
+Phase 16 rollback point for enterprise preview deployment boundary.
+
+Restores:
+
+- Cloudflare enterprise preview boundary record
+- deployment health check records
+- frontend deployment boundary panel
+- API origin boundary
+- CORS expectations
+- environment variable expectations
+- health check readiness definitions

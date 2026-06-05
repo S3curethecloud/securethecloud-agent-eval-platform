@@ -278,3 +278,44 @@ class EvaluationRunnerJobRecord(Base):
     failure_boundary = Column(JSON, default=dict, nullable=False)
     soc2_mapping = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EnterprisePreviewDeploymentBoundaryRecord(Base):
+    __tablename__ = "enterprise_preview_deployment_boundary_records"
+
+    deployment_boundary_id = Column(String(160), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    preview_mode = Column(String(120), nullable=False)
+    frontend_preview_posture = Column(String(160), nullable=False)
+    target_preview_domain = Column(String(200), nullable=False)
+    api_origin_posture = Column(String(160), nullable=False)
+    api_origin_candidate = Column(String(240), nullable=False)
+    cors_posture = Column(String(160), nullable=False)
+    environment_posture = Column(String(160), nullable=False)
+    health_check_posture = Column(String(160), nullable=False)
+    deployment_authority = Column(String(120), nullable=False)
+    true_mode = Column(String(80), nullable=False)
+    production_authority = Column(String(80), nullable=False)
+    live_autonomous_execution = Column(String(80), nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    required_environment_variables = Column(JSON, default=list, nullable=False)
+    cors_expectations = Column(JSON, default=dict, nullable=False)
+    health_checks = Column(JSON, default=list, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class DeploymentHealthCheckRecord(Base):
+    __tablename__ = "deployment_health_check_records"
+
+    deployment_health_check_id = Column(String(160), primary_key=True, index=True)
+    deployment_boundary_id = Column(String(160), index=True, nullable=False)
+    check_name = Column(String(160), nullable=False)
+    check_type = Column(String(100), nullable=False)
+    expected_result = Column(String(160), nullable=False)
+    current_status = Column(String(120), nullable=False)
+    endpoint_or_surface = Column(String(240), nullable=False)
+    failure_action = Column(String(200), nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

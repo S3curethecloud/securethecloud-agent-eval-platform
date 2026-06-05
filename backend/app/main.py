@@ -23,8 +23,10 @@ from app.models import (
     EvidenceExportManifestRecord,
     EvaluationRunnerQueueRecord,
     EvaluationRunnerJobRecord,
+    EnterprisePreviewDeploymentBoundaryRecord,
+    DeploymentHealthCheckRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary, seed_enterprise_preview_deployment_boundary
 from pydantic import BaseModel
 
 
@@ -45,6 +47,7 @@ def startup_persistent_evidence_store():
         seed_audit_evidence_ledger(db)
         seed_evidence_package_reviewer_workspace(db)
         seed_queue_backed_evaluation_runner_boundary(db)
+        seed_enterprise_preview_deployment_boundary(db)
     finally:
         db.close()
 
@@ -2746,4 +2749,95 @@ def get_evaluation_runner_job(job_id: str, db: Session = Depends(get_db)):
             "failure_boundary": job.failure_boundary,
             "soc2_mapping": job.soc2_mapping,
         },
+    }
+
+
+@app.get("/api/v1/deployment/enterprise-preview")
+def get_enterprise_preview_deployment_boundary(db: Session = Depends(get_db)):
+    boundaries = db.query(EnterprisePreviewDeploymentBoundaryRecord).all()
+    checks = db.query(DeploymentHealthCheckRecord).all()
+    boundary = boundaries[0] if boundaries else None
+
+    return {
+        "phase": "16",
+        "foundation_status": "FOUNDATION_ADDED",
+        "deployment_posture": boundary.preview_mode if boundary else "pending",
+        "frontend_preview_posture": boundary.frontend_preview_posture if boundary else "pending",
+        "target_preview_domain": boundary.target_preview_domain if boundary else "pending",
+        "api_origin_posture": boundary.api_origin_posture if boundary else "pending",
+        "api_origin_candidate": boundary.api_origin_candidate if boundary else "pending",
+        "cors_posture": boundary.cors_posture if boundary else "pending",
+        "environment_posture": boundary.environment_posture if boundary else "pending",
+        "health_check_posture": boundary.health_check_posture if boundary else "pending",
+        "health_check_count": len(checks),
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "live_autonomous_execution": "not_active",
+        "customer_data_processing": "not_active",
+        "boundary_statement": boundary.boundary_statement if boundary else "Enterprise preview deployment boundary pending.",
+        "required_environment_variables": boundary.required_environment_variables if boundary else [],
+        "cors_expectations": boundary.cors_expectations if boundary else {},
+        "health_checks": boundary.health_checks if boundary else [],
+        "soc2_mapping": boundary.soc2_mapping if boundary else {},
+    }
+
+
+@app.get("/api/v1/deployment/cloudflare-boundary")
+def get_cloudflare_deployment_boundary(db: Session = Depends(get_db)):
+    boundary = db.query(EnterprisePreviewDeploymentBoundaryRecord).filter(
+        EnterprisePreviewDeploymentBoundaryRecord.deployment_boundary_id == "deployment_boundary_phase_16_enterprise_preview"
+    ).first()
+
+    if not boundary:
+        return {
+            "phase": "16",
+            "foundation_status": "FOUNDATION_ADDED",
+            "found": False,
+            "message": "Cloudflare enterprise preview boundary not found.",
+        }
+
+    return {
+        "phase": "16",
+        "foundation_status": "FOUNDATION_ADDED",
+        "found": True,
+        "cloudflare_posture": "PREVIEW_BOUNDARY_DEFINED",
+        "frontend_preview_posture": boundary.frontend_preview_posture,
+        "target_preview_domain": boundary.target_preview_domain,
+        "api_origin_candidate": boundary.api_origin_candidate,
+        "cors_expectations": boundary.cors_expectations,
+        "required_environment_variables": boundary.required_environment_variables,
+        "true_mode": boundary.true_mode,
+        "production_authority": boundary.production_authority,
+        "live_autonomous_execution": boundary.live_autonomous_execution,
+        "boundary_statement": boundary.boundary_statement,
+    }
+
+
+@app.get("/api/v1/deployment/health-checks")
+def get_deployment_health_checks(db: Session = Depends(get_db)):
+    checks = db.query(DeploymentHealthCheckRecord).order_by(
+        DeploymentHealthCheckRecord.deployment_health_check_id.asc()
+    ).all()
+
+    return {
+        "phase": "16",
+        "foundation_status": "FOUNDATION_ADDED",
+        "health_check_count": len(checks),
+        "preview_promotion_allowed": False,
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "checks": [
+            {
+                "deployment_health_check_id": check.deployment_health_check_id,
+                "deployment_boundary_id": check.deployment_boundary_id,
+                "check_name": check.check_name,
+                "check_type": check.check_type,
+                "expected_result": check.expected_result,
+                "current_status": check.current_status,
+                "endpoint_or_surface": check.endpoint_or_surface,
+                "failure_action": check.failure_action,
+                "soc2_mapping": check.soc2_mapping,
+            }
+            for check in checks
+        ],
     }

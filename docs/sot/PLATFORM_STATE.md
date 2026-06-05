@@ -100,3 +100,5 @@ TRUE_MODE remains inactive.
 - evidence package export and reviewer workspace foundation
 
 - queue-backed evaluation runner boundary foundation
+
+- enterprise preview deployment boundary foundation

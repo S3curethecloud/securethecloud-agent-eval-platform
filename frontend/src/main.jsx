@@ -31,6 +31,8 @@ function App() {
   const [exportManifest, setExportManifest] = useState(null);
   const [runnerQueue, setRunnerQueue] = useState(null);
   const [runnerJobs, setRunnerJobs] = useState(null);
+  const [deploymentBoundary, setDeploymentBoundary] = useState(null);
+  const [deploymentHealthChecks, setDeploymentHealthChecks] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -293,6 +295,31 @@ function App() {
     };
 
     hydrateQueueRunner();
+  }, []);
+
+
+  // phase16DeploymentBoundaryIndependentHydration
+  useEffect(() => {
+    const hydrateDeploymentBoundary = async () => {
+      try {
+        const [boundaryResponse, checksResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/deployment/enterprise-preview`),
+          fetch(`${API_BASE}/api/v1/deployment/health-checks`)
+        ]);
+
+        if (boundaryResponse.ok) {
+          setDeploymentBoundary(await boundaryResponse.json());
+        }
+
+        if (checksResponse.ok) {
+          setDeploymentHealthChecks(await checksResponse.json());
+        }
+      } catch (error) {
+        console.warn("Phase 16 deployment boundary hydration failed", error);
+      }
+    };
+
+    hydrateDeploymentBoundary();
   }, []);
 
   return (
@@ -1073,7 +1100,72 @@ function App() {
 
 
 
-      <section className="shell phase15Panel">
+      
+      <section className="shell phase16Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 16 - Enterprise Preview Deployment Boundary</p>
+            <h2>Cloudflare Preview Readiness, API Origin & Deployment Controls</h2>
+            <p>
+              Cloudflare enterprise preview readiness is defined without production activation.
+              Frontend preview posture, API origin expectations, CORS boundaries, environment variables,
+              and health checks are recorded while TRUE_MODE and live autonomous execution remain inactive.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Preview Boundary</span>
+            <b>{deploymentBoundary?.foundation_status || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard ledgerMetricCard">
+            <b>{deploymentBoundary?.deployment_posture || "pending"}</b>
+            <span>Deployment Posture</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{deploymentBoundary?.target_preview_domain || "pending"}</b>
+            <span>Preview Domain</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{deploymentBoundary?.cors_posture || "pending"}</b>
+            <span>CORS Boundary</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{deploymentHealthChecks?.health_check_count ?? 0}</b>
+            <span>Health Checks</span>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>Deployment Boundary</h3>
+          <p>
+            {deploymentBoundary?.boundary_statement ||
+              "Enterprise preview deployment boundary pending. No production activation is allowed."}
+          </p>
+        </div>
+
+        <div className="ledgerGrid">
+          {(deploymentHealthChecks?.checks || []).map((check) => (
+            <div className="card ledgerCard" key={check.deployment_health_check_id}>
+              <div className="cardTitleRow">
+                <h3>{check.check_name}</h3>
+                <span className="pill good">{check.current_status}</span>
+              </div>
+              <p>Type: <b>{check.check_type}</b></p>
+              <p>Expected: <b>{check.expected_result}</b></p>
+              <p>Surface: <b>{check.endpoint_or_surface}</b></p>
+              <p>Failure action: <b>{check.failure_action}</b></p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          Deployment trace: Cloudflare Preview → Frontend Surface → API Origin → CORS Boundary → Environment Variables → Health Checks → No TRUE_MODE → SOC 2 Trace
+        </div>
+      </section>
+
+<section className="shell phase15Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 15 - Queue-Backed Evaluation Runner Boundary</p>
