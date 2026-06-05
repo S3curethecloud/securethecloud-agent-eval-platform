@@ -29,6 +29,8 @@ function App() {
   const [evidenceChain, setEvidenceChain] = useState(null);
   const [reviewerWorkspace, setReviewerWorkspace] = useState(null);
   const [exportManifest, setExportManifest] = useState(null);
+  const [runnerQueue, setRunnerQueue] = useState(null);
+  const [runnerJobs, setRunnerJobs] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -266,6 +268,31 @@ function App() {
     };
 
     hydrateReviewerWorkspace();
+  }, []);
+
+
+  // phase15QueueRunnerIndependentHydration
+  useEffect(() => {
+    const hydrateQueueRunner = async () => {
+      try {
+        const [queueResponse, jobsResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/evaluation-runner/queue`),
+          fetch(`${API_BASE}/api/v1/evaluation-runner/jobs`)
+        ]);
+
+        if (queueResponse.ok) {
+          setRunnerQueue(await queueResponse.json());
+        }
+
+        if (jobsResponse.ok) {
+          setRunnerJobs(await jobsResponse.json());
+        }
+      } catch (error) {
+        console.warn("Phase 15 evaluation runner hydration failed", error);
+      }
+    };
+
+    hydrateQueueRunner();
   }, []);
 
   return (
@@ -1045,7 +1072,76 @@ function App() {
 
 
 
-      <section className="shell phase14Panel">
+
+      <section className="shell phase15Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 15 - Queue-Backed Evaluation Runner Boundary</p>
+            <h2>Evaluation Runner Queue, Job Lifecycle & Worker Boundary</h2>
+            <p>
+              Queue-backed runner boundary is defined and simulated for enterprise architecture readiness.
+              No live autonomous execution, external worker system, production agent tool use, or TRUE_MODE activation is active.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Runner Boundary</span>
+            <b>{runnerQueue?.foundation_status || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard ledgerMetricCard">
+            <b>{runnerJobs?.job_count ?? 0}</b>
+            <span>Runner Jobs</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{runnerJobs?.review_required ?? 0}</b>
+            <span>Review Required</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{runnerJobs?.completed ?? 0}</b>
+            <span>Completed Simulated</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{runnerJobs?.blocked ?? 0}</b>
+            <span>Blocked</span>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>Runner Boundary</h3>
+          <p>
+            {runnerQueue?.queues?.[0]?.boundary_statement ||
+              "Queue-backed runner boundary is simulated. No external workers or live autonomous execution are active."}
+          </p>
+        </div>
+
+        <div className="ledgerGrid">
+          {(runnerJobs?.jobs || []).map((job) => (
+            <div className="card ledgerCard" key={job.runner_job_id}>
+              <div className="cardTitleRow">
+                <h3>{job.runner_job_id}</h3>
+                <span className={job.lifecycle_state === "COMPLETED_SIMULATED" ? "pill good" : "pill danger"}>
+                  {job.lifecycle_state}
+                </span>
+              </div>
+              <p>Run: <b>{job.evaluation_run_id}</b></p>
+              <p>Benchmark: <b>{job.benchmark_id}</b></p>
+              <p>Status: <b>{job.scheduling_status}</b></p>
+              <p>Retry: <b>{job.retry_count}/{job.retry_limit}</b></p>
+              <p>Timeout: <b>{job.timeout_seconds}s</b></p>
+              <p>Cost: <b>${job.estimated_cost_usd} / ${job.cost_budget_usd}</b></p>
+              <p>Isolation: <b>{job.worker_isolation}</b></p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          Runner trace: Queue → Job → Benchmark → Policy Precheck → Retry Boundary → Timeout Boundary → Cost Boundary → Worker Isolation → SOC 2 Trace
+        </div>
+      </section>
+
+<section className="shell phase14Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 14 - Evidence Package Export & Reviewer Workspace</p>

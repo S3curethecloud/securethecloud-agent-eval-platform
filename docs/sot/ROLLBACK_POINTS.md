@@ -116,3 +116,19 @@ Restores:
 - reviewer decisions
 - evidence chain references
 - frontend reviewer workspace panel
+
+
+## v0.15.0-queue-backed-evaluation-runner-boundary
+
+Phase 15 rollback point for queue-backed evaluation runner boundary.
+
+Restores:
+
+- evaluation runner queue records
+- evaluation runner job records
+- runner lifecycle states
+- retry boundary
+- timeout boundary
+- cost budget boundary
+- worker isolation posture
+- frontend Queue-Backed Runner panel

@@ -98,3 +98,5 @@ TRUE_MODE remains inactive.
 - append-only audit and evidence ledger foundation
 
 - evidence package export and reviewer workspace foundation
+
+- queue-backed evaluation runner boundary foundation

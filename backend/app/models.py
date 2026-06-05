@@ -230,3 +230,51 @@ class EvidenceExportManifestRecord(Base):
     boundary_statement = Column(Text, nullable=False)
     soc2_mapping = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EvaluationRunnerQueueRecord(Base):
+    __tablename__ = "evaluation_runner_queue_records"
+
+    queue_id = Column(String(140), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    queue_name = Column(String(160), nullable=False)
+    queue_status = Column(String(80), nullable=False)
+    runner_mode = Column(String(120), nullable=False)
+    queued_jobs = Column(Integer, nullable=False)
+    running_jobs = Column(Integer, nullable=False)
+    completed_jobs = Column(Integer, nullable=False)
+    blocked_jobs = Column(Integer, nullable=False)
+    retry_boundary = Column(JSON, default=dict, nullable=False)
+    timeout_boundary = Column(JSON, default=dict, nullable=False)
+    cost_budget_boundary = Column(JSON, default=dict, nullable=False)
+    worker_isolation_posture = Column(String(160), nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EvaluationRunnerJobRecord(Base):
+    __tablename__ = "evaluation_runner_job_records"
+
+    runner_job_id = Column(String(140), primary_key=True, index=True)
+    queue_id = Column(String(140), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    evaluation_run_id = Column(String(140), index=True, nullable=False)
+    benchmark_id = Column(String(140), index=True, nullable=False)
+    agent_id = Column(String(140), index=True, nullable=False)
+    lifecycle_state = Column(String(80), nullable=False)
+    scheduling_status = Column(String(120), nullable=False)
+    retry_count = Column(Integer, nullable=False)
+    retry_limit = Column(Integer, nullable=False)
+    timeout_seconds = Column(Integer, nullable=False)
+    estimated_cost_usd = Column(String(40), nullable=False)
+    cost_budget_usd = Column(String(40), nullable=False)
+    worker_isolation = Column(String(140), nullable=False)
+    scheduled_by = Column(String(160), nullable=False)
+    request_id = Column(String(160), nullable=False)
+    scheduling_evidence = Column(JSON, default=dict, nullable=False)
+    failure_boundary = Column(JSON, default=dict, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

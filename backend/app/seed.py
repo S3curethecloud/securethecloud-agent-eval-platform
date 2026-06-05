@@ -16,6 +16,8 @@ from app.models import (
     EvidenceChainRecord,
     ReviewerWorkspaceRecord,
     EvidenceExportManifestRecord,
+    EvaluationRunnerQueueRecord,
+    EvaluationRunnerJobRecord,
 )
 
 
@@ -556,6 +558,217 @@ def seed_evidence_package_reviewer_workspace(db):
             "status": "FOUNDATION_ADDED",
             "export_posture": "REVIEWABLE_JSON_EXPORT_SIMULATED",
             "true_mode": "not_active",
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+
+def seed_queue_backed_evaluation_runner_boundary(db):
+    existing = db.query(EvaluationRunnerQueueRecord).filter(
+        EvaluationRunnerQueueRecord.queue_id == "queue_phase_15_enterprise_preview"
+    ).first()
+    if existing:
+        return
+
+    queue = EvaluationRunnerQueueRecord(
+        queue_id="queue_phase_15_enterprise_preview",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        queue_name="Agent Evaluation Enterprise Preview Queue",
+        queue_status="FOUNDATION_ADDED",
+        runner_mode="QUEUE_BACKED_SIMULATED",
+        queued_jobs=2,
+        running_jobs=0,
+        completed_jobs=1,
+        blocked_jobs=2,
+        retry_boundary={
+            "retry_limit": 2,
+            "retry_backoff": "simulated_exponential_backoff",
+            "retry_on": ["transient_runner_failure"],
+            "do_not_retry": ["policy_block", "rbac_block", "cost_budget_exceeded"],
+        },
+        timeout_boundary={
+            "default_timeout_seconds": 120,
+            "max_timeout_seconds": 300,
+            "timeout_action": "mark_job_review_required",
+        },
+        cost_budget_boundary={
+            "default_budget_usd": "1.00",
+            "max_budget_usd": "5.00",
+            "budget_exceeded_action": "block_job_before_execution",
+        },
+        worker_isolation_posture="SIMULATED_ISOLATED_WORKER_BOUNDARY",
+        boundary_statement="Queue-backed runner boundary is defined and simulated for enterprise architecture readiness. No live autonomous execution, external worker system, production agent tool use, or TRUE_MODE activation is active.",
+        soc2_mapping={
+            "availability": [
+                "queue status model",
+                "retry and timeout boundaries",
+                "release-safe job lifecycle tracking",
+            ],
+            "processing_integrity": [
+                "runner request contract",
+                "scheduling evidence",
+                "cost and retry boundary enforcement posture",
+            ],
+        },
+    )
+
+    jobs = [
+        EvaluationRunnerJobRecord(
+            runner_job_id="runner_job_eval_run_1",
+            queue_id="queue_phase_15_enterprise_preview",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            evaluation_run_id="eval_run_1",
+            benchmark_id="test_hallucination_regulatory_claim",
+            agent_id="agent_policy_copilot",
+            lifecycle_state="QUEUED_FOR_REVIEW",
+            scheduling_status="REVIEW_REQUIRED_BEFORE_RUN",
+            retry_count=0,
+            retry_limit=2,
+            timeout_seconds=120,
+            estimated_cost_usd="0.31",
+            cost_budget_usd="1.00",
+            worker_isolation="simulated_worker_namespace",
+            scheduled_by="principal_enterprise_evaluator",
+            request_id="req_phase_15_runner_0001",
+            scheduling_evidence={
+                "reason": "high_risk_hallucination_benchmark",
+                "requires_human_review": True,
+                "policy_decision": "human_review_required",
+                "runner_execution": "not_started",
+            },
+            failure_boundary={
+                "on_policy_failure": "hold_job",
+                "on_timeout": "mark_review_required",
+                "on_cost_exceeded": "block_job",
+            },
+            soc2_mapping={
+                "availability": ["queued job visible", "timeout boundary recorded"],
+                "processing_integrity": ["policy precheck required", "scheduling evidence retained"],
+            },
+        ),
+        EvaluationRunnerJobRecord(
+            runner_job_id="runner_job_eval_run_2",
+            queue_id="queue_phase_15_enterprise_preview",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            evaluation_run_id="eval_run_2",
+            benchmark_id="test_destructive_tool_call",
+            agent_id="agent_policy_copilot",
+            lifecycle_state="BLOCKED",
+            scheduling_status="BLOCKED_BY_TOOL_POLICY",
+            retry_count=0,
+            retry_limit=0,
+            timeout_seconds=0,
+            estimated_cost_usd="0.00",
+            cost_budget_usd="1.00",
+            worker_isolation="not_allocated",
+            scheduled_by="system_policy_validator",
+            request_id="req_phase_15_runner_0002",
+            scheduling_evidence={
+                "reason": "destructive_tool_attempt",
+                "blocked_tool": "delete_customer_record",
+                "runner_execution": "blocked_before_worker_allocation",
+            },
+            failure_boundary={
+                "on_policy_failure": "block_job",
+                "on_rbac_failure": "block_job",
+                "on_forbidden_tool": "block_job",
+            },
+            soc2_mapping={
+                "availability": ["blocked job state visible"],
+                "processing_integrity": ["forbidden tool prevented before execution"],
+            },
+        ),
+        EvaluationRunnerJobRecord(
+            runner_job_id="runner_job_eval_run_3",
+            queue_id="queue_phase_15_enterprise_preview",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            evaluation_run_id="eval_run_3",
+            benchmark_id="test_rag_grounding",
+            agent_id="agent_retrieval_analyst",
+            lifecycle_state="COMPLETED_SIMULATED",
+            scheduling_status="COMPLETED_WITHIN_BOUNDARY",
+            retry_count=0,
+            retry_limit=2,
+            timeout_seconds=90,
+            estimated_cost_usd="0.18",
+            cost_budget_usd="1.00",
+            worker_isolation="simulated_worker_namespace",
+            scheduled_by="principal_enterprise_evaluator",
+            request_id="req_phase_15_runner_0003",
+            scheduling_evidence={
+                "reason": "medium_risk_rag_grounding_benchmark",
+                "requires_human_review": False,
+                "runner_execution": "simulated_complete",
+            },
+            failure_boundary={
+                "on_policy_failure": "hold_job",
+                "on_timeout": "mark_review_required",
+                "on_cost_exceeded": "block_job",
+            },
+            soc2_mapping={
+                "availability": ["job completed within timeout boundary"],
+                "processing_integrity": ["runner lifecycle state recorded"],
+            },
+        ),
+        EvaluationRunnerJobRecord(
+            runner_job_id="runner_job_eval_run_5",
+            queue_id="queue_phase_15_enterprise_preview",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            evaluation_run_id="eval_run_5",
+            benchmark_id="test_cost_abuse_retry_loop",
+            agent_id="agent_workflow_automator",
+            lifecycle_state="BLOCKED",
+            scheduling_status="BLOCKED_BY_COST_BUDGET",
+            retry_count=3,
+            retry_limit=2,
+            timeout_seconds=120,
+            estimated_cost_usd="6.40",
+            cost_budget_usd="1.00",
+            worker_isolation="not_allocated",
+            scheduled_by="system_cost_guard",
+            request_id="req_phase_15_runner_0005",
+            scheduling_evidence={
+                "reason": "retry_loop_cost_abuse",
+                "retry_count_exceeded": True,
+                "cost_budget_exceeded": True,
+                "runner_execution": "blocked_before_worker_allocation",
+            },
+            failure_boundary={
+                "on_retry_limit_exceeded": "block_job",
+                "on_cost_exceeded": "block_job",
+                "on_timeout": "mark_review_required",
+            },
+            soc2_mapping={
+                "availability": ["runaway retry prevented"],
+                "processing_integrity": ["cost budget boundary enforced in scheduling evidence"],
+            },
+        ),
+    ]
+
+    db.add(queue)
+    for job in jobs:
+        db.add(job)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_15_runner_boundary_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_queue_backed_evaluation_runner_boundary",
+        object_type="evaluation_runner_queue",
+        object_id="queue_phase_15_enterprise_preview",
+        event_metadata={
+            "phase": "15",
+            "status": "FOUNDATION_ADDED",
+            "runner_mode": "QUEUE_BACKED_SIMULATED",
+            "true_mode": "not_active",
+            "external_worker_system": "not_active",
         },
     )
     db.add(audit)

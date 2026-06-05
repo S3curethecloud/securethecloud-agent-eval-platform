@@ -21,8 +21,10 @@ from app.models import (
     EvidenceChainRecord,
     ReviewerWorkspaceRecord,
     EvidenceExportManifestRecord,
+    EvaluationRunnerQueueRecord,
+    EvaluationRunnerJobRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary
 from pydantic import BaseModel
 
 
@@ -42,6 +44,7 @@ def startup_persistent_evidence_store():
         seed_tenant_workspace_rbac_boundary(db)
         seed_audit_evidence_ledger(db)
         seed_evidence_package_reviewer_workspace(db)
+        seed_queue_backed_evaluation_runner_boundary(db)
     finally:
         db.close()
 
@@ -2607,5 +2610,140 @@ def get_evidence_export_package(evidence_package_id: str, db: Session = Depends(
             "production_authority": "not_granted",
             "signed_bundle_generation": "not_active",
             "auditor_attestation": "not_claimed",
+        },
+    }
+
+
+@app.get("/api/v1/evaluation-runner/queue")
+def get_evaluation_runner_queue(db: Session = Depends(get_db)):
+    queues = db.query(EvaluationRunnerQueueRecord).all()
+    jobs = db.query(EvaluationRunnerJobRecord).all()
+
+    return {
+        "phase": "15",
+        "foundation_status": "FOUNDATION_ADDED",
+        "runner_posture": "QUEUE_BACKED_SIMULATED",
+        "queue_count": len(queues),
+        "job_count": len(jobs),
+        "queued_jobs": len([job for job in jobs if job.lifecycle_state == "QUEUED_FOR_REVIEW"]),
+        "running_jobs": len([job for job in jobs if job.lifecycle_state == "RUNNING"]),
+        "completed_jobs": len([job for job in jobs if job.lifecycle_state == "COMPLETED_SIMULATED"]),
+        "blocked_jobs": len([job for job in jobs if job.lifecycle_state == "BLOCKED"]),
+        "true_mode": "not_active",
+        "external_worker_system": "not_active",
+        "live_autonomous_execution": "not_active",
+        "production_authority": "not_granted",
+        "queues": [
+            {
+                "queue_id": queue.queue_id,
+                "tenant_id": queue.tenant_id,
+                "workspace_id": queue.workspace_id,
+                "queue_name": queue.queue_name,
+                "queue_status": queue.queue_status,
+                "runner_mode": queue.runner_mode,
+                "queued_jobs": queue.queued_jobs,
+                "running_jobs": queue.running_jobs,
+                "completed_jobs": queue.completed_jobs,
+                "blocked_jobs": queue.blocked_jobs,
+                "retry_boundary": queue.retry_boundary,
+                "timeout_boundary": queue.timeout_boundary,
+                "cost_budget_boundary": queue.cost_budget_boundary,
+                "worker_isolation_posture": queue.worker_isolation_posture,
+                "boundary_statement": queue.boundary_statement,
+                "soc2_mapping": queue.soc2_mapping,
+            }
+            for queue in queues
+        ],
+    }
+
+
+@app.get("/api/v1/evaluation-runner/jobs")
+def get_evaluation_runner_jobs(db: Session = Depends(get_db)):
+    jobs = db.query(EvaluationRunnerJobRecord).order_by(
+        EvaluationRunnerJobRecord.runner_job_id.asc()
+    ).all()
+
+    return {
+        "phase": "15",
+        "foundation_status": "FOUNDATION_ADDED",
+        "runner_posture": "QUEUE_BACKED_SIMULATED",
+        "job_count": len(jobs),
+        "review_required": len([job for job in jobs if job.lifecycle_state == "QUEUED_FOR_REVIEW"]),
+        "completed": len([job for job in jobs if job.lifecycle_state == "COMPLETED_SIMULATED"]),
+        "blocked": len([job for job in jobs if job.lifecycle_state == "BLOCKED"]),
+        "true_mode": "not_active",
+        "external_worker_system": "not_active",
+        "jobs": [
+            {
+                "runner_job_id": job.runner_job_id,
+                "queue_id": job.queue_id,
+                "tenant_id": job.tenant_id,
+                "workspace_id": job.workspace_id,
+                "evaluation_run_id": job.evaluation_run_id,
+                "benchmark_id": job.benchmark_id,
+                "agent_id": job.agent_id,
+                "lifecycle_state": job.lifecycle_state,
+                "scheduling_status": job.scheduling_status,
+                "retry_count": job.retry_count,
+                "retry_limit": job.retry_limit,
+                "timeout_seconds": job.timeout_seconds,
+                "estimated_cost_usd": job.estimated_cost_usd,
+                "cost_budget_usd": job.cost_budget_usd,
+                "worker_isolation": job.worker_isolation,
+                "scheduled_by": job.scheduled_by,
+                "request_id": job.request_id,
+                "scheduling_evidence": job.scheduling_evidence,
+                "failure_boundary": job.failure_boundary,
+                "soc2_mapping": job.soc2_mapping,
+            }
+            for job in jobs
+        ],
+    }
+
+
+@app.get("/api/v1/evaluation-runner/jobs/{job_id}")
+def get_evaluation_runner_job(job_id: str, db: Session = Depends(get_db)):
+    job = db.query(EvaluationRunnerJobRecord).filter(
+        EvaluationRunnerJobRecord.runner_job_id == job_id
+    ).first()
+
+    if not job:
+        return {
+            "phase": "15",
+            "foundation_status": "FOUNDATION_ADDED",
+            "found": False,
+            "runner_job_id": job_id,
+            "message": "Evaluation runner job not found.",
+        }
+
+    return {
+        "phase": "15",
+        "foundation_status": "FOUNDATION_ADDED",
+        "found": True,
+        "runner_posture": "QUEUE_BACKED_SIMULATED",
+        "true_mode": "not_active",
+        "external_worker_system": "not_active",
+        "live_autonomous_execution": "not_active",
+        "job": {
+            "runner_job_id": job.runner_job_id,
+            "queue_id": job.queue_id,
+            "tenant_id": job.tenant_id,
+            "workspace_id": job.workspace_id,
+            "evaluation_run_id": job.evaluation_run_id,
+            "benchmark_id": job.benchmark_id,
+            "agent_id": job.agent_id,
+            "lifecycle_state": job.lifecycle_state,
+            "scheduling_status": job.scheduling_status,
+            "retry_count": job.retry_count,
+            "retry_limit": job.retry_limit,
+            "timeout_seconds": job.timeout_seconds,
+            "estimated_cost_usd": job.estimated_cost_usd,
+            "cost_budget_usd": job.cost_budget_usd,
+            "worker_isolation": job.worker_isolation,
+            "scheduled_by": job.scheduled_by,
+            "request_id": job.request_id,
+            "scheduling_evidence": job.scheduling_evidence,
+            "failure_boundary": job.failure_boundary,
+            "soc2_mapping": job.soc2_mapping,
         },
     }

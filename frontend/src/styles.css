@@ -1042,3 +1042,11 @@ select {
   margin: 0;
   line-height: 1.45;
 }
+
+
+.phase15Panel {
+  border-color: #39d0ff;
+  background:
+    radial-gradient(circle at top left, rgba(57, 208, 255, 0.08), transparent 34%),
+    rgba(3, 24, 38, 0.78);
+}
