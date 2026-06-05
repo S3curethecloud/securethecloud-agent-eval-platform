@@ -46,3 +46,43 @@ def test_forbidden_runtime_claims_absent():
     ]
     for phrase in forbidden:
         assert phrase not in combined, phrase
+
+
+def test_portfolio_fit_baseline_preserves_doctrine_boundary():
+    from pathlib import Path
+
+    baseline = Path("docs/portfolio/AGENT_EVALUATION_PLATFORM_PORTFOLIO_FIT_BASELINE.md").read_text()
+
+    required_phrases = [
+        "Phase 2 AI Chaos Harness / offline evaluation support repository",
+        "not a new product suite",
+        "not a fifth suite",
+        "not an independent authority plane",
+        "not an enforcement surface",
+        "not a runtime controller",
+        "not a live production mutation system",
+        "Agent Eval recommends. Governance approves. Aegis/OPA/SENTINEL enforce. Black Box preserves evidence.",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in baseline
+
+
+def test_portfolio_fit_baseline_blocks_forbidden_claims():
+    from pathlib import Path
+
+    baseline = Path("docs/portfolio/AGENT_EVALUATION_PLATFORM_PORTFOLIO_FIT_BASELINE.md").read_text()
+
+    forbidden_claims = [
+        "TRUE_MODE active status",
+        "SOC 2 certification",
+        "production operating effectiveness",
+        "runtime enforcement authority",
+        "production mutation authority",
+        "SENTINEL bypass authority",
+        "OPA bypass authority",
+        "Aegis bypass authority",
+    ]
+
+    for claim in forbidden_claims:
+        assert claim in baseline

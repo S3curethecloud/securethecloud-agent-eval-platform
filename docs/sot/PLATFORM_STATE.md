@@ -102,3 +102,5 @@ TRUE_MODE remains inactive.
 - queue-backed evaluation runner boundary foundation
 
 - enterprise preview deployment boundary foundation
+
+- portfolio fit doctrine reconciliation

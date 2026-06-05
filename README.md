@@ -298,3 +298,22 @@ Phase 9 endpoints:
 - `GET /api/regression/detections/{run_id}`
 
 Regression Detection is lab-safe and deterministic. It does not enforce production release gates, execute live agents, call live LLMs, or mutate runtime systems.
+
+
+## Portfolio Fit and Doctrine Boundary
+
+The SecureTheCloud Agent Evaluation Platform is classified as a governed Phase 2 AI Chaos Harness / offline evaluation support repository.
+
+It supports evaluation and assurance workflows including benchmark harness planning, hallucination checks, RAG grounding checks, tool-call verification, policy compliance mapping, regression detection, resilience validation evidence, and reviewer-ready evidence package preparation.
+
+It is not a new product suite, not a fifth suite, not an independent authority plane, not an enforcement surface, not a runtime controller, and not a live production mutation system.
+
+Canonical operating phrase:
+
+> Agent Eval recommends. Governance approves. Aegis/OPA/SENTINEL enforce. Black Box preserves evidence.
+
+See:
+
+- `docs/portfolio/AGENT_EVALUATION_PLATFORM_PORTFOLIO_FIT_BASELINE.md`
+- `docs/doctrine/CANONICAL_DOCTRINE_ADOPTION.md`
+- `docs/doctrine/AGENT_EVAL_PLATFORM_PHASE_2_AI_CHAOS_HARNESS_BOUNDARY.md`

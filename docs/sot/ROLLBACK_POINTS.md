@@ -147,3 +147,16 @@ Restores:
 - CORS expectations
 - environment variable expectations
 - health check readiness definitions
+
+
+## v0.17.0-portfolio-fit-doctrine-reconciliation
+
+Phase 17 rollback point for portfolio fit and doctrine reconciliation.
+
+Restores:
+
+- Agent Evaluation Platform portfolio fit baseline
+- Phase 2 AI Chaos Harness support-lane classification
+- allowed and forbidden claim boundary
+- diagram mapping
+- local doctrine adoption reconciliation
