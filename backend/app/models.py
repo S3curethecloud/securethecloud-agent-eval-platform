@@ -194,3 +194,39 @@ class EvidenceChainRecord(Base):
     chain_integrity_status = Column(String(80), nullable=False)
     soc2_traceability = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class ReviewerWorkspaceRecord(Base):
+    __tablename__ = "reviewer_workspace_records"
+
+    reviewer_workspace_id = Column(String(140), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    reviewer_role = Column(String(120), nullable=False)
+    review_queue_status = Column(String(80), nullable=False)
+    packages_ready = Column(Integer, nullable=False)
+    packages_requiring_review = Column(Integer, nullable=False)
+    approval_required_count = Column(Integer, nullable=False)
+    export_posture = Column(String(120), nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EvidenceExportManifestRecord(Base):
+    __tablename__ = "evidence_export_manifest_records"
+
+    export_manifest_id = Column(String(140), primary_key=True, index=True)
+    evidence_package_id = Column(String(140), index=True, nullable=False)
+    evidence_chain_id = Column(String(140), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    export_status = Column(String(80), nullable=False)
+    export_type = Column(String(120), nullable=False)
+    reviewer_decision = Column(String(80), nullable=False)
+    package_integrity_status = Column(String(120), nullable=False)
+    included_artifacts = Column(JSON, default=list, nullable=False)
+    redaction_status = Column(String(120), nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

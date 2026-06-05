@@ -1017,3 +1017,28 @@ select {
   display: block;
   opacity: 0.9;
 }
+
+
+.phase14Panel {
+  border-color: #00ff88;
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 136, 0.08), transparent 34%),
+    rgba(4, 30, 28, 0.76);
+}
+
+.reviewerBoundary {
+  border: 1px solid #ffd400;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 18px;
+  background: rgba(24, 20, 8, 0.68);
+}
+
+.reviewerBoundary h3 {
+  margin: 0 0 8px;
+}
+
+.reviewerBoundary p {
+  margin: 0;
+  line-height: 1.45;
+}

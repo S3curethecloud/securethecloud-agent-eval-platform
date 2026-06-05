@@ -27,6 +27,8 @@ function App() {
   const [rbacAccess, setRbacAccess] = useState(null);
   const [auditLedger, setAuditLedger] = useState(null);
   const [evidenceChain, setEvidenceChain] = useState(null);
+  const [reviewerWorkspace, setReviewerWorkspace] = useState(null);
+  const [exportManifest, setExportManifest] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -240,6 +242,31 @@ function App() {
   const selectedBenchmark = benchmarks.find(
     (benchmark) => benchmark.benchmark_id === selectedBenchmarkId
   );
+
+
+  // phase14ReviewerWorkspaceIndependentHydration
+  useEffect(() => {
+    const hydrateReviewerWorkspace = async () => {
+      try {
+        const [reviewerResponse, manifestResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/reviewer/workspace`),
+          fetch(`${API_BASE}/api/v1/evidence-export/manifest`)
+        ]);
+
+        if (reviewerResponse.ok) {
+          setReviewerWorkspace(await reviewerResponse.json());
+        }
+
+        if (manifestResponse.ok) {
+          setExportManifest(await manifestResponse.json());
+        }
+      } catch (error) {
+        console.warn("Phase 14 reviewer workspace hydration failed", error);
+      }
+    };
+
+    hydrateReviewerWorkspace();
+  }, []);
 
   return (
     <main className="page">
@@ -1017,7 +1044,75 @@ function App() {
 
 
 
-      <section className="shell phase13Panel">
+
+      <section className="shell phase14Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 14 - Evidence Package Export & Reviewer Workspace</p>
+            <h2>Reviewer Workspace, Export Manifest & Evidence Package Review</h2>
+            <p>
+              Reviewers can inspect lab-safe evidence package manifests, export posture, redaction state,
+              included artifacts, evidence chain references, and SOC 2-aligned traceability before any
+              enterprise-style presentation. This is reviewable JSON export posture only.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Reviewer Workspace</span>
+            <b>{reviewerWorkspace?.foundation_status || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard ledgerMetricCard">
+            <b>{exportManifest?.manifest_count ?? 0}</b>
+            <span>Export Manifests</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{exportManifest?.ready_for_review ?? 0}</b>
+            <span>Ready</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{exportManifest?.review_required ?? 0}</b>
+            <span>Review Required</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{exportManifest?.blocked ?? 0}</b>
+            <span>Blocked</span>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>Review Boundary</h3>
+          <p>
+            {reviewerWorkspace?.workspaces?.[0]?.boundary_statement ||
+              "Reviewable package metadata only. No production export, signed bundle, or auditor attestation is active."}
+          </p>
+        </div>
+
+        <div className="ledgerGrid">
+          {(exportManifest?.manifests || []).map((manifest) => (
+            <div className="card ledgerCard" key={manifest.export_manifest_id}>
+              <div className="cardTitleRow">
+                <h3>{manifest.export_manifest_id}</h3>
+                <span className={manifest.export_status === "READY_FOR_REVIEW" ? "pill good" : "pill danger"}>
+                  {manifest.export_status}
+                </span>
+              </div>
+              <p>Evidence: <b>{manifest.evidence_package_id}</b></p>
+              <p>Chain: <b>{manifest.evidence_chain_id}</b></p>
+              <p>Decision: <b>{manifest.reviewer_decision}</b></p>
+              <p>Redaction: <b>{manifest.redaction_status}</b></p>
+              <p className="wrapValue">Artifacts: <b>{(manifest.included_artifacts || []).join(", ")}</b></p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          Review trace: Evidence Package → Export Manifest → Evidence Chain → Included Artifacts → Redaction State → Reviewer Decision → SOC 2 Trace
+        </div>
+      </section>
+
+<section className="shell phase13Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 13 - Append-Only Audit & Evidence Ledger</p>

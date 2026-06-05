@@ -101,3 +101,18 @@ Restores:
 - request metadata traceability
 - SOC 2 Security and Processing Integrity traceability
 - frontend audit ledger panel
+
+
+## v0.14.0-evidence-package-reviewer-workspace
+
+Phase 14 rollback point for evidence package export and reviewer workspace foundation.
+
+Restores:
+
+- reviewer workspace records
+- evidence export manifest records
+- reviewable JSON export posture
+- redaction status
+- reviewer decisions
+- evidence chain references
+- frontend reviewer workspace panel

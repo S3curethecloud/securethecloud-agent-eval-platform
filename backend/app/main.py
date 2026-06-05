@@ -19,8 +19,10 @@ from app.models import (
     RbacEvidenceRecord,
     AuditLedgerEventRecord,
     EvidenceChainRecord,
+    ReviewerWorkspaceRecord,
+    EvidenceExportManifestRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace
 from pydantic import BaseModel
 
 
@@ -39,6 +41,7 @@ def startup_persistent_evidence_store():
         seed_persistent_evidence_store(db)
         seed_tenant_workspace_rbac_boundary(db)
         seed_audit_evidence_ledger(db)
+        seed_evidence_package_reviewer_workspace(db)
     finally:
         db.close()
 
@@ -2492,4 +2495,117 @@ def get_evidence_chain(db: Session = Depends(get_db)):
             }
             for chain in chains
         ],
+    }
+
+
+@app.get("/api/v1/reviewer/workspace")
+def get_reviewer_workspace(db: Session = Depends(get_db)):
+    workspaces = db.query(ReviewerWorkspaceRecord).all()
+    manifests = db.query(EvidenceExportManifestRecord).all()
+
+    return {
+        "phase": "14",
+        "foundation_status": "FOUNDATION_ADDED",
+        "workspace_count": len(workspaces),
+        "manifest_count": len(manifests),
+        "review_queue_status": workspaces[0].review_queue_status if workspaces else "pending",
+        "export_posture": workspaces[0].export_posture if workspaces else "pending",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "signed_bundle_generation": "not_active",
+        "auditor_attestation": "not_claimed",
+        "workspaces": [
+            {
+                "reviewer_workspace_id": workspace.reviewer_workspace_id,
+                "tenant_id": workspace.tenant_id,
+                "workspace_id": workspace.workspace_id,
+                "reviewer_role": workspace.reviewer_role,
+                "review_queue_status": workspace.review_queue_status,
+                "packages_ready": workspace.packages_ready,
+                "packages_requiring_review": workspace.packages_requiring_review,
+                "approval_required_count": workspace.approval_required_count,
+                "export_posture": workspace.export_posture,
+                "boundary_statement": workspace.boundary_statement,
+                "soc2_mapping": workspace.soc2_mapping,
+            }
+            for workspace in workspaces
+        ],
+    }
+
+
+@app.get("/api/v1/evidence-export/manifest")
+def get_evidence_export_manifest(db: Session = Depends(get_db)):
+    manifests = db.query(EvidenceExportManifestRecord).order_by(
+        EvidenceExportManifestRecord.export_manifest_id.asc()
+    ).all()
+
+    return {
+        "phase": "14",
+        "foundation_status": "FOUNDATION_ADDED",
+        "export_posture": "REVIEWABLE_JSON_EXPORT_SIMULATED",
+        "manifest_count": len(manifests),
+        "ready_for_review": len([m for m in manifests if m.export_status == "READY_FOR_REVIEW"]),
+        "review_required": len([m for m in manifests if m.export_status == "REVIEW_REQUIRED"]),
+        "blocked": len([m for m in manifests if m.export_status == "BLOCKED"]),
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "signed_bundle_generation": "not_active",
+        "manifests": [
+            {
+                "export_manifest_id": manifest.export_manifest_id,
+                "evidence_package_id": manifest.evidence_package_id,
+                "evidence_chain_id": manifest.evidence_chain_id,
+                "tenant_id": manifest.tenant_id,
+                "workspace_id": manifest.workspace_id,
+                "export_status": manifest.export_status,
+                "export_type": manifest.export_type,
+                "reviewer_decision": manifest.reviewer_decision,
+                "package_integrity_status": manifest.package_integrity_status,
+                "included_artifacts": manifest.included_artifacts,
+                "redaction_status": manifest.redaction_status,
+                "boundary_statement": manifest.boundary_statement,
+                "soc2_mapping": manifest.soc2_mapping,
+            }
+            for manifest in manifests
+        ],
+    }
+
+
+@app.get("/api/v1/evidence-export/package/{evidence_package_id}")
+def get_evidence_export_package(evidence_package_id: str, db: Session = Depends(get_db)):
+    manifest = db.query(EvidenceExportManifestRecord).filter(
+        EvidenceExportManifestRecord.evidence_package_id == evidence_package_id
+    ).first()
+
+    if not manifest:
+        return {
+            "phase": "14",
+            "foundation_status": "FOUNDATION_ADDED",
+            "found": False,
+            "evidence_package_id": evidence_package_id,
+            "message": "Evidence export package not found in reviewable manifest.",
+        }
+
+    return {
+        "phase": "14",
+        "foundation_status": "FOUNDATION_ADDED",
+        "found": True,
+        "export_package": {
+            "evidence_package_id": manifest.evidence_package_id,
+            "export_manifest_id": manifest.export_manifest_id,
+            "evidence_chain_id": manifest.evidence_chain_id,
+            "tenant_id": manifest.tenant_id,
+            "workspace_id": manifest.workspace_id,
+            "export_status": manifest.export_status,
+            "export_type": manifest.export_type,
+            "reviewer_decision": manifest.reviewer_decision,
+            "package_integrity_status": manifest.package_integrity_status,
+            "included_artifacts": manifest.included_artifacts,
+            "redaction_status": manifest.redaction_status,
+            "boundary_statement": manifest.boundary_statement,
+            "soc2_mapping": manifest.soc2_mapping,
+            "production_authority": "not_granted",
+            "signed_bundle_generation": "not_active",
+            "auditor_attestation": "not_claimed",
+        },
     }

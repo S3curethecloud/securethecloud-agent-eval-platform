@@ -14,6 +14,8 @@ from app.models import (
     RbacEvidenceRecord,
     AuditLedgerEventRecord,
     EvidenceChainRecord,
+    ReviewerWorkspaceRecord,
+    EvidenceExportManifestRecord,
 )
 
 
@@ -423,6 +425,136 @@ def seed_audit_evidence_ledger(db):
             "phase": "13",
             "status": "FOUNDATION_ADDED",
             "immutability_posture": "APPEND_ONLY_SIMULATED",
+            "true_mode": "not_active",
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+
+def seed_evidence_package_reviewer_workspace(db):
+    existing = db.query(ReviewerWorkspaceRecord).filter(
+        ReviewerWorkspaceRecord.reviewer_workspace_id == "reviewer_workspace_phase_14_enterprise_preview"
+    ).first()
+    if existing:
+        return
+
+    workspace = ReviewerWorkspaceRecord(
+        reviewer_workspace_id="reviewer_workspace_phase_14_enterprise_preview",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        reviewer_role="enterprise_evidence_reviewer",
+        review_queue_status="FOUNDATION_ADDED",
+        packages_ready=3,
+        packages_requiring_review=2,
+        approval_required_count=2,
+        export_posture="REVIEWABLE_JSON_EXPORT_SIMULATED",
+        boundary_statement="Evidence export is reviewable package metadata only. No signed bundle, production export, real customer data, or auditor attestation is generated in this phase.",
+        soc2_mapping={
+            "security": ["reviewer access boundary", "tenant scoped evidence package review"],
+            "processing_integrity": ["evidence package completeness", "review decision traceability"],
+            "confidentiality": ["redaction posture recorded", "no real customer or patient data"],
+        },
+    )
+
+    manifests = [
+        EvidenceExportManifestRecord(
+            export_manifest_id="export_manifest_eval_run_1",
+            evidence_package_id="evidence_1",
+            evidence_chain_id="evidence_chain_phase_13_eval_run_1",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            export_status="REVIEW_REQUIRED",
+            export_type="reviewable_json_package",
+            reviewer_decision="HUMAN_REVIEW_REQUIRED",
+            package_integrity_status="CHAIN_REFERENCED",
+            included_artifacts=[
+                "evaluation_run",
+                "benchmark_record",
+                "prompt",
+                "retrieved_context",
+                "policy_decision",
+                "hallucination_score",
+                "rag_evaluation",
+                "audit_ledger_events",
+            ],
+            redaction_status="REDACTION_REQUIRED",
+            boundary_statement="Package requires reviewer approval before any enterprise-style export presentation.",
+            soc2_mapping={
+                "security": ["restricted reviewer queue", "audit chain referenced"],
+                "processing_integrity": ["unsupported claim evidence included", "policy decision included"],
+                "confidentiality": ["redaction required before external presentation"],
+            },
+        ),
+        EvidenceExportManifestRecord(
+            export_manifest_id="export_manifest_eval_run_2",
+            evidence_package_id="evidence_2",
+            evidence_chain_id="evidence_chain_phase_13_eval_run_1",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            export_status="BLOCKED",
+            export_type="reviewable_json_package",
+            reviewer_decision="BLOCK_EXPORT",
+            package_integrity_status="CHAIN_REFERENCED",
+            included_artifacts=[
+                "evaluation_run",
+                "tool_call_verification",
+                "policy_decision",
+                "rbac_boundary",
+                "audit_ledger_events",
+            ],
+            redaction_status="NOT_EXPORTABLE",
+            boundary_statement="Destructive tool attempt blocks package export until remediation evidence exists.",
+            soc2_mapping={
+                "security": ["destructive action blocked", "tool misuse evidence retained"],
+                "processing_integrity": ["tool behavior mismatch recorded"],
+                "confidentiality": ["no production data export"],
+            },
+        ),
+        EvidenceExportManifestRecord(
+            export_manifest_id="export_manifest_eval_run_3",
+            evidence_package_id="evidence_3",
+            evidence_chain_id="evidence_chain_phase_13_eval_run_1",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            export_status="READY_FOR_REVIEW",
+            export_type="reviewable_json_package",
+            reviewer_decision="NO_ESCALATION_REQUIRED",
+            package_integrity_status="CHAIN_REFERENCED",
+            included_artifacts=[
+                "evaluation_run",
+                "ground_truth",
+                "retrieved_context",
+                "rag_evaluation",
+                "policy_decision",
+                "audit_ledger_events",
+            ],
+            redaction_status="LAB_SAFE",
+            boundary_statement="Package is lab-safe and ready for reviewer inspection.",
+            soc2_mapping={
+                "security": ["reviewer trace available"],
+                "processing_integrity": ["grounded answer evidence included"],
+                "confidentiality": ["lab-safe evidence only"],
+            },
+        ),
+    ]
+
+    db.add(workspace)
+    for manifest in manifests:
+        db.add(manifest)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_14_reviewer_workspace_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_evidence_package_reviewer_workspace",
+        object_type="reviewer_workspace",
+        object_id="reviewer_workspace_phase_14_enterprise_preview",
+        event_metadata={
+            "phase": "14",
+            "status": "FOUNDATION_ADDED",
+            "export_posture": "REVIEWABLE_JSON_EXPORT_SIMULATED",
             "true_mode": "not_active",
         },
     )

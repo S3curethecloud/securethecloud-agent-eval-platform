@@ -96,3 +96,5 @@ TRUE_MODE remains inactive.
 - tenant / workspace / RBAC boundary foundation
 
 - append-only audit and evidence ledger foundation
+
+- evidence package export and reviewer workspace foundation
