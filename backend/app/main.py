@@ -17,8 +17,10 @@ from app.models import (
     WorkspaceRecord,
     RoleAssignmentRecord,
     RbacEvidenceRecord,
+    AuditLedgerEventRecord,
+    EvidenceChainRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger
 from pydantic import BaseModel
 
 
@@ -36,6 +38,7 @@ def startup_persistent_evidence_store():
     try:
         seed_persistent_evidence_store(db)
         seed_tenant_workspace_rbac_boundary(db)
+        seed_audit_evidence_ledger(db)
     finally:
         db.close()
 
@@ -2409,5 +2412,84 @@ def get_rbac_evidence(db: Session = Depends(get_db)):
                 "soc2_mapping": e.soc2_mapping,
             }
             for e in evidence_records
+        ],
+    }
+
+
+@app.get("/api/v1/audit-ledger/events")
+def get_audit_ledger_events(db: Session = Depends(get_db)):
+    events = db.query(AuditLedgerEventRecord).order_by(
+        AuditLedgerEventRecord.ledger_sequence.asc()
+    ).all()
+
+    return {
+        "phase": "13",
+        "foundation_status": "FOUNDATION_ADDED",
+        "ledger_posture": "APPEND_ONLY_SIMULATED",
+        "immutability_posture": "append_only_contract_defined",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "event_count": len(events),
+        "soc2_traceability": {
+            "security": [
+                "actor_action_object_trace",
+                "tenant_workspace_scope",
+                "restricted_action_audit_boundary",
+            ],
+            "processing_integrity": [
+                "request_metadata_capture",
+                "evidence_lifecycle_trace",
+                "hash_chain_style_continuity",
+            ],
+        },
+        "events": [
+            {
+                "ledger_event_id": event.ledger_event_id,
+                "evidence_chain_id": event.evidence_chain_id,
+                "tenant_id": event.tenant_id,
+                "workspace_id": event.workspace_id,
+                "actor_id": event.actor_id,
+                "actor_type": event.actor_type,
+                "action": event.action,
+                "object_type": event.object_type,
+                "object_id": event.object_id,
+                "request_id": event.request_id,
+                "request_metadata": event.request_metadata,
+                "ledger_sequence": event.ledger_sequence,
+                "previous_event_hash": event.previous_event_hash,
+                "event_hash": event.event_hash,
+                "immutability_posture": event.immutability_posture,
+                "soc2_mapping": event.soc2_mapping,
+            }
+            for event in events
+        ],
+    }
+
+
+@app.get("/api/v1/audit-ledger/evidence-chain")
+def get_evidence_chain(db: Session = Depends(get_db)):
+    chains = db.query(EvidenceChainRecord).all()
+
+    return {
+        "phase": "13",
+        "foundation_status": "FOUNDATION_ADDED",
+        "chain_count": len(chains),
+        "ledger_posture": "APPEND_ONLY_SIMULATED",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "chains": [
+            {
+                "evidence_chain_id": chain.evidence_chain_id,
+                "tenant_id": chain.tenant_id,
+                "workspace_id": chain.workspace_id,
+                "chain_subject": chain.chain_subject,
+                "chain_status": chain.chain_status,
+                "event_count": chain.event_count,
+                "first_event_id": chain.first_event_id,
+                "latest_event_id": chain.latest_event_id,
+                "chain_integrity_status": chain.chain_integrity_status,
+                "soc2_traceability": chain.soc2_traceability,
+            }
+            for chain in chains
         ],
     }

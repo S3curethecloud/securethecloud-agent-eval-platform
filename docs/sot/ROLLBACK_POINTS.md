@@ -87,3 +87,17 @@ TRUE_MODE is still not active at this rollback point.
 ## v0.12.0-tenant-workspace-rbac-boundary
 
 Phase 12 rollback point for tenant, workspace, and RBAC boundary foundation.
+
+
+## v0.13.0-audit-evidence-ledger
+
+Phase 13 rollback point for append-only audit and evidence ledger foundation.
+
+Restores:
+
+- audit ledger event records
+- evidence chain records
+- tenant/workspace-scoped audit events
+- request metadata traceability
+- SOC 2 Security and Processing Integrity traceability
+- frontend audit ledger panel

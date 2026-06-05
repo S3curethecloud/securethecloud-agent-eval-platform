@@ -965,3 +965,36 @@ select {
   word-break: break-word;
   line-height: 1.35;
 }
+
+
+.phase13Panel {
+  border-color: #ffd400;
+  background:
+    radial-gradient(circle at top left, rgba(255, 212, 0, 0.08), transparent 34%),
+    rgba(24, 22, 12, 0.76);
+}
+
+.ledgerMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ledgerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ledgerCard {
+  min-height: 230px;
+}
+
+@media (max-width: 900px) {
+  .ledgerMetrics,
+  .ledgerGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -25,6 +25,8 @@ function App() {
   const [enterpriseReadinessPosture, setEnterpriseReadinessPosture] = useState(null);
   const [tenancyStatus, setTenancyStatus] = useState(null);
   const [rbacAccess, setRbacAccess] = useState(null);
+  const [auditLedger, setAuditLedger] = useState(null);
+  const [evidenceChain, setEvidenceChain] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -66,7 +68,9 @@ function App() {
         trueModeRequirementsData,
         enterpriseReadinessPostureData,
         tenancyStatusData,
-        rbacAccessData
+        rbacAccessData,
+        auditLedgerData,
+        evidenceChainData
       ] = await Promise.all([
         loadJson("/api/dashboard", {}),
         loadJson("/api/agents", []),
@@ -131,7 +135,9 @@ function App() {
         loadJson("/api/platform/truemode-requirements", null),
         loadJson("/api/platform/enterprise-readiness-posture", null),
         loadJson("/api/v1/tenancy/status", null),
-        loadJson("/api/v1/rbac/effective-access", null)
+        loadJson("/api/v1/rbac/effective-access", null),
+        loadJson("/api/v1/audit-ledger/events", null),
+        loadJson("/api/v1/audit-ledger/evidence-chain", null)
       ]);
 
       setDashboard(dashboardData);
@@ -150,6 +156,8 @@ function App() {
       setEnterpriseReadinessPosture(enterpriseReadinessPostureData);
       setTenancyStatus(tenancyStatusData);
       setRbacAccess(rbacAccessData);
+      setAuditLedger(auditLedgerData);
+      setEvidenceChain(evidenceChainData);
     // phase12TenantRbacHydration
     try {
       const [tenantBoundaryResponse, rbacBoundaryResponse] = await Promise.all([
@@ -1008,7 +1016,66 @@ function App() {
       </section>
 
 
-      <section className="shell phase12Panel">
+      
+      <section className="shell phase13Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 13 - Append-Only Audit & Evidence Ledger</p>
+            <h2>Audit Ledger, Evidence Chain & SOC 2 Traceability</h2>
+            <p>
+              The ledger foundation records actor, action, object, request metadata, tenant/workspace scope,
+              evidence chain IDs, and SOC 2 Security plus Processing Integrity traceability.
+              It is append-only posture only: TRUE_MODE, production authority, and live autonomous execution remain inactive.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Audit Ledger</span>
+            <b>{auditLedger?.foundation_status || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard">
+            <b>{auditLedger?.event_count ?? 0}</b>
+            <span>Ledger Events</span>
+          </div>
+          <div className="metricCard">
+            <b>{evidenceChain?.chain_count ?? 0}</b>
+            <span>Evidence Chains</span>
+          </div>
+          <div className="metricCard">
+            <b>{auditLedger?.ledger_posture || "pending"}</b>
+            <span>Ledger Posture</span>
+          </div>
+          <div className="metricCard">
+            <b>{auditLedger?.true_mode || "not_active"}</b>
+            <span>TRUE_MODE</span>
+          </div>
+        </div>
+
+        <div className="ledgerGrid">
+          {(auditLedger?.events || []).map((event) => (
+            <div className="card ledgerCard" key={event.ledger_event_id}>
+              <div className="cardTitleRow">
+                <h3>{event.ledger_event_id}</h3>
+                <span className="pill good">SEQ {event.ledger_sequence}</span>
+              </div>
+              <p>Actor: <b>{event.actor_id}</b></p>
+              <p>Action: <b>{event.action}</b></p>
+              <p>Object: <b>{event.object_type}:{event.object_id}</b></p>
+              <p>Request: <b>{event.request_id}</b></p>
+              <p>Hash: <b>{event.event_hash}</b></p>
+              <p className="wrapValue">Posture: <b>{event.immutability_posture}</b></p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          Audit trace: Tenant → Workspace → Actor → Action → Object → Request Metadata → Event Hash → Evidence Chain → SOC 2 Trace
+        </div>
+      </section>
+
+<section className="shell phase12Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 12 - Tenant / Workspace / RBAC Boundary</p>

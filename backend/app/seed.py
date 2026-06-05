@@ -12,6 +12,8 @@ from app.models import (
     WorkspaceRecord,
     RoleAssignmentRecord,
     RbacEvidenceRecord,
+    AuditLedgerEventRecord,
+    EvidenceChainRecord,
 )
 
 
@@ -288,5 +290,141 @@ def seed_tenant_workspace_rbac_boundary(db):
     db.add(workspace)
     db.add(assignment)
     db.add(evidence)
+    db.add(audit)
+    db.commit()
+
+
+def seed_audit_evidence_ledger(db):
+    existing = db.query(EvidenceChainRecord).filter(
+        EvidenceChainRecord.evidence_chain_id == "evidence_chain_phase_13_eval_run_1"
+    ).first()
+    if existing:
+        return
+
+    chain_id = "evidence_chain_phase_13_eval_run_1"
+
+    events = [
+        AuditLedgerEventRecord(
+            ledger_event_id="ledger_evt_0001_eval_run_created",
+            evidence_chain_id=chain_id,
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            actor_id="principal_enterprise_evaluator",
+            actor_type="user",
+            action="create_evaluation_run",
+            object_type="evaluation_run",
+            object_id="eval_run_1",
+            request_id="req_phase_13_0001",
+            request_metadata={
+                "source": "enterprise_preview_ui",
+                "phase": "13",
+                "method": "POST",
+                "path": "/api/v1/evaluation-runs",
+                "ip_classification": "demo_internal",
+            },
+            ledger_sequence=1,
+            previous_event_hash="GENESIS",
+            event_hash="sha256-demo-ledger-event-0001",
+            immutability_posture="APPEND_ONLY_SIMULATED",
+            soc2_mapping={
+                "security": ["actor_action_object_trace", "tenant_scoped_event"],
+                "processing_integrity": ["evaluation_run_created", "request_metadata_recorded"],
+            },
+        ),
+        AuditLedgerEventRecord(
+            ledger_event_id="ledger_evt_0002_policy_decision_recorded",
+            evidence_chain_id=chain_id,
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            actor_id="system_policy_validator",
+            actor_type="system",
+            action="record_policy_decision",
+            object_type="policy_decision",
+            object_id="policy_validate_eval_run_1",
+            request_id="req_phase_13_0002",
+            request_metadata={
+                "source": "policy_compliance_validator",
+                "phase": "13",
+                "frameworks": ["nist_ai_rmf", "soc2", "internal_ai_policy"],
+            },
+            ledger_sequence=2,
+            previous_event_hash="sha256-demo-ledger-event-0001",
+            event_hash="sha256-demo-ledger-event-0002",
+            immutability_posture="APPEND_ONLY_SIMULATED",
+            soc2_mapping={
+                "security": ["policy_decision_trace", "restricted_action_boundary"],
+                "processing_integrity": ["policy_outcome_recorded", "failed_controls_traceable"],
+            },
+        ),
+        AuditLedgerEventRecord(
+            ledger_event_id="ledger_evt_0003_evidence_package_recorded",
+            evidence_chain_id=chain_id,
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            actor_id="system_evidence_store",
+            actor_type="system",
+            action="record_evidence_package",
+            object_type="evidence_package",
+            object_id="evidence_1",
+            request_id="req_phase_13_0003",
+            request_metadata={
+                "source": "persistent_evidence_store",
+                "phase": "13",
+                "storage": "postgresql_backed_preview",
+            },
+            ledger_sequence=3,
+            previous_event_hash="sha256-demo-ledger-event-0002",
+            event_hash="sha256-demo-ledger-event-0003",
+            immutability_posture="APPEND_ONLY_SIMULATED",
+            soc2_mapping={
+                "security": ["evidence_access_trace", "tenant_workspace_scope"],
+                "processing_integrity": ["evidence_package_recorded", "chain_integrity_tracked"],
+            },
+        ),
+    ]
+
+    chain = EvidenceChainRecord(
+        evidence_chain_id=chain_id,
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        chain_subject="eval_run_1",
+        chain_status="ACTIVE",
+        event_count=len(events),
+        first_event_id="ledger_evt_0001_eval_run_created",
+        latest_event_id="ledger_evt_0003_evidence_package_recorded",
+        chain_integrity_status="HASH_CHAIN_SIMULATED",
+        soc2_traceability={
+            "security": [
+                "actor/action/object traceability",
+                "tenant and workspace scoped records",
+                "restricted action audit posture",
+            ],
+            "processing_integrity": [
+                "request metadata captured",
+                "evaluation and evidence lifecycle trace",
+                "hash-chain style evidence continuity",
+            ],
+        },
+    )
+
+    db.add(chain)
+    for event in events:
+        db.add(event)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_13_ledger_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_audit_evidence_ledger",
+        object_type="audit_ledger",
+        object_id=chain_id,
+        event_metadata={
+            "phase": "13",
+            "status": "FOUNDATION_ADDED",
+            "immutability_posture": "APPEND_ONLY_SIMULATED",
+            "true_mode": "not_active",
+        },
+    )
     db.add(audit)
     db.commit()

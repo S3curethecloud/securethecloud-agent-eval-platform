@@ -156,3 +156,41 @@ class RbacEvidenceRecord(Base):
     policy_reason = Column(Text, nullable=False)
     soc2_mapping = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AuditLedgerEventRecord(Base):
+    __tablename__ = "audit_ledger_event_records"
+
+    ledger_event_id = Column(String(140), primary_key=True, index=True)
+    evidence_chain_id = Column(String(140), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    actor_id = Column(String(160), index=True, nullable=False)
+    actor_type = Column(String(80), nullable=False)
+    action = Column(String(160), nullable=False)
+    object_type = Column(String(120), nullable=False)
+    object_id = Column(String(160), nullable=False)
+    request_id = Column(String(160), index=True, nullable=False)
+    request_metadata = Column(JSON, default=dict, nullable=False)
+    ledger_sequence = Column(Integer, nullable=False)
+    previous_event_hash = Column(String(160), nullable=False)
+    event_hash = Column(String(160), nullable=False)
+    immutability_posture = Column(String(80), nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EvidenceChainRecord(Base):
+    __tablename__ = "evidence_chain_records"
+
+    evidence_chain_id = Column(String(140), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    chain_subject = Column(String(200), nullable=False)
+    chain_status = Column(String(80), nullable=False)
+    event_count = Column(Integer, nullable=False)
+    first_event_id = Column(String(140), nullable=False)
+    latest_event_id = Column(String(140), nullable=False)
+    chain_integrity_status = Column(String(80), nullable=False)
+    soc2_traceability = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

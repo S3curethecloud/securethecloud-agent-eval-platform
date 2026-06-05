@@ -94,3 +94,5 @@ Phase 11 adds PostgreSQL-backed persistence foundation and read-only `/api/v1` e
 TRUE_MODE remains inactive.
 
 - tenant / workspace / RBAC boundary foundation
+
+- append-only audit and evidence ledger foundation
