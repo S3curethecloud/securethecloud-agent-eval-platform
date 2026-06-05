@@ -951,3 +951,17 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+
+.phase12StatusCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.wrapValue {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+}

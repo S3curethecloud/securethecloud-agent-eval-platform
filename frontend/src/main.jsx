@@ -62,9 +62,11 @@ function App() {
         toolVerificationData,
         policyComplianceData,
         regressionData,
-      platformModeData,
-      trueModeRequirementsData,
-      enterpriseReadinessPostureData
+        platformModeData,
+        trueModeRequirementsData,
+        enterpriseReadinessPostureData,
+        tenancyStatusData,
+        rbacAccessData
       ] = await Promise.all([
         loadJson("/api/dashboard", {}),
         loadJson("/api/agents", []),
@@ -142,12 +144,30 @@ function App() {
       setRag(ragData);
       setToolVerification(toolVerificationData);
       setPolicyCompliance(policyComplianceData);
-    setRegression(regressionData);
-    setPlatformMode(platformModeData);
-    setTrueModeRequirements(trueModeRequirementsData);
-    setEnterpriseReadinessPosture(enterpriseReadinessPostureData);
-    setTenancyStatus(tenancyStatusData);
-    setRbacAccess(rbacAccessData);
+      setRegression(regressionData);
+      setPlatformMode(platformModeData);
+      setTrueModeRequirements(trueModeRequirementsData);
+      setEnterpriseReadinessPosture(enterpriseReadinessPostureData);
+      setTenancyStatus(tenancyStatusData);
+      setRbacAccess(rbacAccessData);
+    // phase12TenantRbacHydration
+    try {
+      const [tenantBoundaryResponse, rbacBoundaryResponse] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/tenancy/status`),
+        fetch(`${API_BASE}/api/v1/rbac/effective-access`)
+      ]);
+
+      if (tenantBoundaryResponse.ok) {
+        setTenancyStatus(await tenantBoundaryResponse.json());
+      }
+
+      if (rbacBoundaryResponse.ok) {
+        setRbacAccess(await rbacBoundaryResponse.json());
+      }
+    } catch (phase12Error) {
+      console.warn("Phase 12 tenant/RBAC hydration failed", phase12Error);
+    }
+
 
       setStatus("Live backend connected.");
     } catch {
@@ -987,7 +1007,7 @@ function App() {
         </div>
       </section>
 
-      
+
       <section className="shell phase12Panel">
         <div className="sectionHeader">
           <div>
@@ -999,8 +1019,8 @@ function App() {
               SENTINEL bypass, live autonomous tool execution, or external identity provider is active.
             </p>
           </div>
-          <div className="statusCard">
-            <span>Tenant / RBAC Status</span>
+          <div className="statusCard phase12StatusCard">
+            <span>Tenant / RBAC</span>
             <b>{tenancyStatus?.foundation_status || "Loading"}</b>
           </div>
         </div>
@@ -1016,7 +1036,8 @@ function App() {
           <div className="card">
             <h3>Identity and RBAC</h3>
             <p>Assignments: <b>{rbacAccess?.role_assignment_count ?? 0}</b></p>
-            <p>Posture: <b>{rbacAccess?.access_posture || "pending"}</b></p>
+            <p>Posture:</p>
+            <p className="wrapValue"><b>{rbacAccess?.access_posture || "pending"}</b></p>
             <p>TRUE_MODE: <b>{rbacAccess?.true_mode || "not_active"}</b></p>
             <span className="pill good">{rbacAccess?.foundation_status || "PENDING"}</span>
           </div>
