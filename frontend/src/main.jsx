@@ -1016,7 +1016,7 @@ function App() {
       </section>
 
 
-      
+
       <section className="shell phase13Panel">
         <div className="sectionHeader">
           <div>
@@ -1035,19 +1035,19 @@ function App() {
         </div>
 
         <div className="ledgerMetrics">
-          <div className="metricCard">
+          <div className="metricCard ledgerMetricCard">
             <b>{auditLedger?.event_count ?? 0}</b>
             <span>Ledger Events</span>
           </div>
-          <div className="metricCard">
+          <div className="metricCard ledgerMetricCard">
             <b>{evidenceChain?.chain_count ?? 0}</b>
             <span>Evidence Chains</span>
           </div>
-          <div className="metricCard">
-            <b>{auditLedger?.ledger_posture || "pending"}</b>
+          <div className="metricCard ledgerMetricCard">
+            <b className="wrapValue">{auditLedger?.ledger_posture || "pending"}</b>
             <span>Ledger Posture</span>
           </div>
-          <div className="metricCard">
+          <div className="metricCard ledgerMetricCard">
             <b>{auditLedger?.true_mode || "not_active"}</b>
             <span>TRUE_MODE</span>
           </div>
