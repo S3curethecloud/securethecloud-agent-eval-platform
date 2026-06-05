@@ -99,3 +99,60 @@ class AuditEventRecord(Base):
     object_id = Column(String(160), nullable=False)
     event_metadata = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class OrganizationRecord(Base):
+    __tablename__ = "organization_records"
+
+    organization_id = Column(String(120), primary_key=True, index=True)
+    tenant_id = Column(String(80), unique=True, index=True, nullable=False)
+    organization_name = Column(String(200), nullable=False)
+    organization_status = Column(String(80), nullable=False)
+    boundary_status = Column(String(80), nullable=False)
+    data_region = Column(String(80), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class WorkspaceRecord(Base):
+    __tablename__ = "workspace_records"
+
+    workspace_id = Column(String(120), primary_key=True, index=True)
+    organization_id = Column(String(120), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_name = Column(String(200), nullable=False)
+    workspace_type = Column(String(80), nullable=False)
+    rbac_mode = Column(String(80), nullable=False)
+    data_boundary = Column(String(120), nullable=False)
+    lifecycle_status = Column(String(80), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class RoleAssignmentRecord(Base):
+    __tablename__ = "role_assignment_records"
+
+    assignment_id = Column(String(120), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    principal_id = Column(String(160), index=True, nullable=False)
+    principal_type = Column(String(80), nullable=False)
+    role_name = Column(String(120), nullable=False)
+    permissions = Column(JSON, default=list, nullable=False)
+    restricted_actions = Column(JSON, default=list, nullable=False)
+    approval_required_actions = Column(JSON, default=list, nullable=False)
+    assignment_status = Column(String(80), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class RbacEvidenceRecord(Base):
+    __tablename__ = "rbac_evidence_records"
+
+    rbac_evidence_id = Column(String(120), primary_key=True, index=True)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    principal_id = Column(String(160), index=True, nullable=False)
+    access_decision = Column(String(80), nullable=False)
+    evaluated_permissions = Column(JSON, default=list, nullable=False)
+    restricted_actions = Column(JSON, default=list, nullable=False)
+    policy_reason = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

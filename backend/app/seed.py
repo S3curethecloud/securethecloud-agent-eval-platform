@@ -8,6 +8,10 @@ from app.models import (
     EvaluationRunRecord,
     EvidencePackageRecord,
     RegressionBaselineRecord,
+    OrganizationRecord,
+    WorkspaceRecord,
+    RoleAssignmentRecord,
+    RbacEvidenceRecord,
 )
 
 
@@ -212,4 +216,77 @@ def seed_persistent_evidence_store(db):
     ]
 
     db.add_all(agents + benchmarks + runs + evidence_records + baselines + audit_events)
+    db.commit()
+
+
+def seed_tenant_workspace_rbac_boundary(db):
+    existing = db.query(OrganizationRecord).filter(OrganizationRecord.tenant_id == TENANT_ID).first()
+    if existing:
+        return
+
+    organization = OrganizationRecord(
+        organization_id="org_securethecloud_enterprise_preview",
+        tenant_id=TENANT_ID,
+        organization_name="SecureTheCloud Enterprise Preview",
+        organization_status="enterprise_preview",
+        boundary_status="FOUNDATION_ADDED",
+        data_region="us-east-demo",
+    )
+
+    workspace = WorkspaceRecord(
+        workspace_id=WORKSPACE_ID,
+        organization_id="org_securethecloud_enterprise_preview",
+        tenant_id=TENANT_ID,
+        workspace_name="Agent Evaluation Enterprise Preview Workspace",
+        workspace_type="enterprise_preview",
+        rbac_mode="simulated_rbac_boundary",
+        data_boundary="tenant_scoped",
+        lifecycle_status="FOUNDATION_ADDED",
+    )
+
+    assignment = RoleAssignmentRecord(
+        assignment_id="role_assignment_enterprise_evaluator",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        principal_id="principal_enterprise_evaluator",
+        principal_type="user",
+        role_name="enterprise_evaluator",
+        permissions=["read_agents", "read_benchmarks", "run_evaluation", "read_evidence", "read_regression"],
+        restricted_actions=["delete_evidence_package", "modify_regression_baseline", "activate_true_mode", "execute_live_agent_tool"],
+        approval_required_actions=["approve_high_risk_release", "change_policy_mapping", "export_enterprise_evidence"],
+        assignment_status="FOUNDATION_ADDED",
+    )
+
+    evidence = RbacEvidenceRecord(
+        rbac_evidence_id="rbac_evidence_phase_12_boundary_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        principal_id="principal_enterprise_evaluator",
+        access_decision="ALLOW_WITH_BOUNDARY",
+        evaluated_permissions=["read_agents", "read_benchmarks", "run_evaluation", "read_evidence"],
+        restricted_actions=["delete_evidence_package", "modify_regression_baseline", "activate_true_mode", "execute_live_agent_tool"],
+        policy_reason="Enterprise preview evaluator may run evaluations and read evidence, but TRUE_MODE activation, destructive evidence mutation, and live autonomous tool execution remain blocked.",
+        soc2_mapping={
+            "security": ["least privilege", "restricted action boundary", "approval-gated sensitive actions"],
+            "confidentiality": ["tenant-scoped workspace boundary", "no cross-tenant evidence access"],
+            "privacy": ["no real customer or patient data connected", "demo-only tenant scope"],
+        },
+    )
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_12_rbac_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_tenant_workspace_rbac_boundary",
+        object_type="rbac_boundary",
+        object_id="rbac_evidence_phase_12_boundary_1",
+        event_metadata={"phase": "12", "status": "FOUNDATION_ADDED", "true_mode": "not_active"},
+    )
+
+    db.add(organization)
+    db.add(workspace)
+    db.add(assignment)
+    db.add(evidence)
+    db.add(audit)
     db.commit()

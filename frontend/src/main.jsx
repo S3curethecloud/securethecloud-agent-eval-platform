@@ -23,6 +23,8 @@ function App() {
   const [platformMode, setPlatformMode] = useState(null);
   const [trueModeRequirements, setTrueModeRequirements] = useState(null);
   const [enterpriseReadinessPosture, setEnterpriseReadinessPosture] = useState(null);
+  const [tenancyStatus, setTenancyStatus] = useState(null);
+  const [rbacAccess, setRbacAccess] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -125,7 +127,9 @@ function App() {
       }),
         loadJson("/api/platform/mode", null),
         loadJson("/api/platform/truemode-requirements", null),
-        loadJson("/api/platform/enterprise-readiness-posture", null)
+        loadJson("/api/platform/enterprise-readiness-posture", null),
+        loadJson("/api/v1/tenancy/status", null),
+        loadJson("/api/v1/rbac/effective-access", null)
       ]);
 
       setDashboard(dashboardData);
@@ -142,6 +146,8 @@ function App() {
     setPlatformMode(platformModeData);
     setTrueModeRequirements(trueModeRequirementsData);
     setEnterpriseReadinessPosture(enterpriseReadinessPostureData);
+    setTenancyStatus(tenancyStatusData);
+    setRbacAccess(rbacAccessData);
 
       setStatus("Live backend connected.");
     } catch {
@@ -981,7 +987,59 @@ function App() {
         </div>
       </section>
 
-      <section className="shell soc2Panel">
+      
+      <section className="shell phase12Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 12 - Tenant / Workspace / RBAC Boundary</p>
+            <h2>Enterprise Access Boundary Foundation</h2>
+            <p>
+              Tenant, workspace, and role-assignment records establish the enterprise access boundary
+              required before TRUE_MODE. This is a foundation layer only: no production authority,
+              SENTINEL bypass, live autonomous tool execution, or external identity provider is active.
+            </p>
+          </div>
+          <div className="statusCard">
+            <span>Tenant / RBAC Status</span>
+            <b>{tenancyStatus?.foundation_status || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="boundarySummaryGrid">
+          <div className="card">
+            <h3>Tenant Boundary</h3>
+            <p>Organizations: <b>{tenancyStatus?.organization_count ?? 0}</b></p>
+            <p>Workspaces: <b>{tenancyStatus?.workspace_count ?? 0}</b></p>
+            <p>Boundary: <b>{tenancyStatus?.tenant_boundary || "pending"}</b></p>
+            <span className="pill good">{tenancyStatus?.foundation_status || "PENDING"}</span>
+          </div>
+          <div className="card">
+            <h3>Identity and RBAC</h3>
+            <p>Assignments: <b>{rbacAccess?.role_assignment_count ?? 0}</b></p>
+            <p>Posture: <b>{rbacAccess?.access_posture || "pending"}</b></p>
+            <p>TRUE_MODE: <b>{rbacAccess?.true_mode || "not_active"}</b></p>
+            <span className="pill good">{rbacAccess?.foundation_status || "PENDING"}</span>
+          </div>
+          <div className="card">
+            <h3>Restricted Actions</h3>
+            {(rbacAccess?.restricted_actions || []).slice(0, 5).map((action) => (
+              <p key={action}>{action}</p>
+            ))}
+          </div>
+          <div className="card">
+            <h3>Approval Required</h3>
+            {(rbacAccess?.approval_required_actions || []).slice(0, 5).map((action) => (
+              <p key={action}>{action}</p>
+            ))}
+          </div>
+        </div>
+
+        <div className="traceLine">
+          {"Access trace: Tenant → Workspace → Principal → Role Assignment → Permissions → Restricted Actions → Approval Boundary → RBAC Evidence"}
+        </div>
+      </section>
+
+<section className="shell soc2Panel">
         <p className="eyebrow">SOC 2 READINESS</p>
         <h2>SOC 2-Aligned Evidence Posture</h2>
         <p>

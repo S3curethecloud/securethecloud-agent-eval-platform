@@ -13,8 +13,12 @@ from app.models import (
     EvaluationRunRecord,
     EvidencePackageRecord,
     RegressionBaselineRecord,
+    OrganizationRecord,
+    WorkspaceRecord,
+    RoleAssignmentRecord,
+    RbacEvidenceRecord,
 )
-from app.seed import seed_persistent_evidence_store
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary
 from pydantic import BaseModel
 
 
@@ -31,6 +35,7 @@ def startup_persistent_evidence_store():
     db = next(get_db())
     try:
         seed_persistent_evidence_store(db)
+        seed_tenant_workspace_rbac_boundary(db)
     finally:
         db.close()
 
@@ -2300,3 +2305,109 @@ def list_v1_regression_baselines(db: Session = Depends(get_db)):
 @app.get("/api/v1/audit-events")
 def list_v1_audit_events(db: Session = Depends(get_db)):
     return [_row_to_dict(row) for row in db.query(AuditEventRecord).order_by(AuditEventRecord.created_at).all()]
+
+
+@app.get("/api/v1/tenancy/status")
+def get_tenancy_status(db: Session = Depends(get_db)):
+    organizations = db.query(OrganizationRecord).all()
+    workspaces = db.query(WorkspaceRecord).all()
+    assignments = db.query(RoleAssignmentRecord).all()
+    return {
+        "phase": "12",
+        "foundation_status": "FOUNDATION_ADDED",
+        "tenant_boundary": "tenant_scoped",
+        "workspace_boundary": "workspace_scoped",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "organization_count": len(organizations),
+        "workspace_count": len(workspaces),
+        "role_assignment_count": len(assignments),
+        "organizations": [
+            {
+                "organization_id": org.organization_id,
+                "tenant_id": org.tenant_id,
+                "organization_name": org.organization_name,
+                "organization_status": org.organization_status,
+                "boundary_status": org.boundary_status,
+                "data_region": org.data_region,
+            }
+            for org in organizations
+        ],
+        "workspaces": [
+            {
+                "workspace_id": ws.workspace_id,
+                "organization_id": ws.organization_id,
+                "tenant_id": ws.tenant_id,
+                "workspace_name": ws.workspace_name,
+                "workspace_type": ws.workspace_type,
+                "rbac_mode": ws.rbac_mode,
+                "data_boundary": ws.data_boundary,
+                "lifecycle_status": ws.lifecycle_status,
+            }
+            for ws in workspaces
+        ],
+    }
+
+
+@app.get("/api/v1/rbac/effective-access")
+def get_effective_access(principal_id: Optional[str] = "principal_enterprise_evaluator", db: Session = Depends(get_db)):
+    assignments = db.query(RoleAssignmentRecord).filter(RoleAssignmentRecord.principal_id == principal_id).all()
+    if not assignments:
+        assignments = db.query(RoleAssignmentRecord).all()
+
+    permissions = sorted({p for a in assignments for p in a.permissions})
+    restricted = sorted({r for a in assignments for r in a.restricted_actions})
+    approvals = sorted({r for a in assignments for r in a.approval_required_actions})
+
+    return {
+        "phase": "12",
+        "foundation_status": "FOUNDATION_ADDED",
+        "rbac_boundary": "simulated_enterprise_preview",
+        "principal_id": principal_id,
+        "role_assignment_count": len(assignments),
+        "effective_permissions": permissions,
+        "restricted_actions": restricted,
+        "approval_required_actions": approvals,
+        "access_posture": "ALLOW_EVALUATION_WITH_RESTRICTED_ACTION_BOUNDARY",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "assignments": [
+            {
+                "assignment_id": a.assignment_id,
+                "tenant_id": a.tenant_id,
+                "workspace_id": a.workspace_id,
+                "principal_id": a.principal_id,
+                "principal_type": a.principal_type,
+                "role_name": a.role_name,
+                "permissions": a.permissions,
+                "restricted_actions": a.restricted_actions,
+                "approval_required_actions": a.approval_required_actions,
+                "assignment_status": a.assignment_status,
+            }
+            for a in assignments
+        ],
+    }
+
+
+@app.get("/api/v1/rbac/evidence")
+def get_rbac_evidence(db: Session = Depends(get_db)):
+    evidence_records = db.query(RbacEvidenceRecord).all()
+    return {
+        "phase": "12",
+        "foundation_status": "FOUNDATION_ADDED",
+        "evidence_count": len(evidence_records),
+        "evidence": [
+            {
+                "rbac_evidence_id": e.rbac_evidence_id,
+                "tenant_id": e.tenant_id,
+                "workspace_id": e.workspace_id,
+                "principal_id": e.principal_id,
+                "access_decision": e.access_decision,
+                "evaluated_permissions": e.evaluated_permissions,
+                "restricted_actions": e.restricted_actions,
+                "policy_reason": e.policy_reason,
+                "soc2_mapping": e.soc2_mapping,
+            }
+            for e in evidence_records
+        ],
+    }

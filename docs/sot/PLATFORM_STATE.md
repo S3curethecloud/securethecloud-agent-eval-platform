@@ -92,3 +92,5 @@ Planned additions:
 Phase 11 adds PostgreSQL-backed persistence foundation and read-only `/api/v1` endpoints for durable agent records, benchmarks, evaluation runs, evidence packages, regression baselines, and audit-ready events.
 
 TRUE_MODE remains inactive.
+
+- tenant / workspace / RBAC boundary foundation

@@ -82,3 +82,8 @@ Use this rollback point to restore:
 - read-only `/api/v1` persistence endpoints.
 
 TRUE_MODE is still not active at this rollback point.
+
+
+## v0.12.0-tenant-workspace-rbac-boundary
+
+Phase 12 rollback point for tenant, workspace, and RBAC boundary foundation.

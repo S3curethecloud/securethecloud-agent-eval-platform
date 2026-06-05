@@ -923,3 +923,31 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+
+.phase12Panel {
+  border-color: #00ff88;
+  background: radial-gradient(circle at top left, rgba(0, 255, 136, 0.08), transparent 34%), rgba(3, 18, 32, 0.92);
+}
+
+.boundarySummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.traceLine {
+  border: 1px solid #15d8ff;
+  border-radius: 14px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  font-weight: 800;
+  background: rgba(1, 9, 24, 0.72);
+}
+
+@media (max-width: 900px) {
+  .boundarySummaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
