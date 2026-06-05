@@ -64,3 +64,21 @@ Current platform is lab-safe and does not contain production runtime state.
 | v0.8.0-policy-compliance-validator | Policy Compliance Validator | Adds framework mapping, governance board referral, policy outcomes, and SOC 2 readiness traceability |
 
 | v0.9.0-regression-detection | Regression Detection | Adds known-good baselines, baseline drift, release recommendations, and SOC 2 change-management traceability |
+
+## v0.11.0-persistent-evidence-store
+
+Phase 11 persistent evidence store baseline.
+
+Use this rollback point to restore:
+
+- PostgreSQL local persistence foundation;
+- SQLAlchemy data model;
+- durable agent records;
+- durable benchmark records;
+- durable evaluation run records;
+- durable evidence package records;
+- durable regression baseline records;
+- audit-ready event records;
+- read-only `/api/v1` persistence endpoints.
+
+TRUE_MODE is still not active at this rollback point.

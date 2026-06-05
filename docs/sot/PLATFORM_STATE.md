@@ -85,3 +85,10 @@ Planned additions:
 - cross-user contamination checks
 - approved memory scope validation
 - SOC 2 Confidentiality and Privacy traceability
+
+
+## Phase 11 Persistent Evidence Store
+
+Phase 11 adds PostgreSQL-backed persistence foundation and read-only `/api/v1` endpoints for durable agent records, benchmarks, evaluation runs, evidence packages, regression baselines, and audit-ready events.
+
+TRUE_MODE remains inactive.

@@ -1,9 +1,30 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: stc_eval
+      POSTGRES_PASSWORD: stc_eval_dev
+      POSTGRES_DB: agent_eval_platform
+    ports:
+      - "5434:5432"
+    volumes:
+      - agent_eval_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stc_eval -d agent_eval_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   backend:
     build:
       context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://stc_eval:stc_eval_dev@postgres:5432/agent_eval_platform
     ports:
       - "8030:8030"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
@@ -16,3 +37,6 @@ services:
       - "3030:3030"
     depends_on:
       - backend
+
+volumes:
+  agent_eval_pgdata:

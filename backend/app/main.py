@@ -2,8 +2,19 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from app.database import get_db, init_db
+from app.models import (
+    AgentRecord,
+    AuditEventRecord,
+    BenchmarkRecord,
+    EvaluationRunRecord,
+    EvidencePackageRecord,
+    RegressionBaselineRecord,
+)
+from app.seed import seed_persistent_evidence_store
 from pydantic import BaseModel
 
 
@@ -11,6 +22,17 @@ app = FastAPI(
     title="SecureTheCloud Agent Evaluation Platform API",
     version="0.3.0",
 )
+
+
+
+@app.on_event("startup")
+def startup_persistent_evidence_store():
+    init_db()
+    db = next(get_db())
+    try:
+        seed_persistent_evidence_store(db)
+    finally:
+        db.close()
 
 app.add_middleware(
     CORSMiddleware,
@@ -2127,9 +2149,9 @@ PLATFORM_MODE = {
 TRUEMODE_REQUIREMENTS = [
     {
         "area": "Persistent Data Layer",
-        "current_state": "seeded in-memory data",
+        "current_state": "PostgreSQL-backed v1 persistence foundation added; legacy seeded demo endpoints remain.",
         "true_mode_requirement": "PostgreSQL or managed database with migrations and durable records.",
-        "status": "not_started",
+        "status": "foundation_added",
     },
     {
         "area": "Tenant Boundary",
@@ -2197,3 +2219,84 @@ def get_truemode_requirements():
 @app.get("/api/platform/enterprise-readiness-posture")
 def get_enterprise_readiness_posture():
     return ENTERPRISE_READINESS_POSTURE
+
+
+
+def _row_to_dict(row):
+    output = {}
+    for column in row.__table__.columns:
+        value = getattr(row, column.name)
+        if hasattr(value, "isoformat"):
+            value = value.isoformat()
+        output[column.name] = value
+    return output
+
+
+@app.get("/api/v1/persistence/status")
+def get_persistence_status(db: Session = Depends(get_db)):
+    return {
+        "storage_mode": "persistent_database",
+        "database_ready": True,
+        "true_mode_active": False,
+        "api_version": "v1",
+        "counts": {
+            "agents": db.query(AgentRecord).count(),
+            "benchmarks": db.query(BenchmarkRecord).count(),
+            "evaluation_runs": db.query(EvaluationRunRecord).count(),
+            "evidence_packages": db.query(EvidencePackageRecord).count(),
+            "regression_baselines": db.query(RegressionBaselineRecord).count(),
+            "audit_events": db.query(AuditEventRecord).count(),
+        },
+        "soc2_posture": "readiness_evidence_only",
+        "phase": "Phase 11 — Persistent Evidence Store",
+    }
+
+
+@app.get("/api/v1/agents")
+def list_v1_agents(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(AgentRecord).order_by(AgentRecord.agent_id).all()]
+
+
+@app.get("/api/v1/benchmarks")
+def list_v1_benchmarks(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(BenchmarkRecord).order_by(BenchmarkRecord.benchmark_id).all()]
+
+
+@app.get("/api/v1/evaluation-runs")
+def list_v1_evaluation_runs(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(EvaluationRunRecord).order_by(EvaluationRunRecord.run_id).all()]
+
+
+@app.get("/api/v1/evaluation-runs/{run_id}")
+def get_v1_evaluation_run(run_id: str, db: Session = Depends(get_db)):
+    row = db.query(EvaluationRunRecord).filter(EvaluationRunRecord.run_id == run_id).first()
+    if not row:
+        return {"error": "run_not_found", "run_id": run_id}
+    evidence = db.query(EvidencePackageRecord).filter(EvidencePackageRecord.run_id == run_id).first()
+    return {
+        "run": _row_to_dict(row),
+        "evidence_package": _row_to_dict(evidence) if evidence else None,
+    }
+
+
+@app.get("/api/v1/evidence-packages")
+def list_v1_evidence_packages(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(EvidencePackageRecord).order_by(EvidencePackageRecord.evidence_id).all()]
+
+
+@app.get("/api/v1/evidence-packages/{evidence_id}")
+def get_v1_evidence_package(evidence_id: str, db: Session = Depends(get_db)):
+    row = db.query(EvidencePackageRecord).filter(EvidencePackageRecord.evidence_id == evidence_id).first()
+    if not row:
+        return {"error": "evidence_not_found", "evidence_id": evidence_id}
+    return _row_to_dict(row)
+
+
+@app.get("/api/v1/regression-baselines")
+def list_v1_regression_baselines(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(RegressionBaselineRecord).order_by(RegressionBaselineRecord.baseline_id).all()]
+
+
+@app.get("/api/v1/audit-events")
+def list_v1_audit_events(db: Session = Depends(get_db)):
+    return [_row_to_dict(row) for row in db.query(AuditEventRecord).order_by(AuditEventRecord.created_at).all()]
