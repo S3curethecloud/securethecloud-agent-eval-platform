@@ -55,7 +55,8 @@ function App() {
         hallucinationData,
         ragData,
         toolVerificationData,
-        policyComplianceData
+        policyComplianceData,
+        regressionData
       ] = await Promise.all([
         loadJson("/api/dashboard", {}),
         loadJson("/api/agents", []),

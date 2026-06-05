@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 10 — Agent Memory Evaluation & Run Traceability |
+| Current phase | Phase 9 — Regression Detection |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.9.0-regression-detection |
+| Latest stable baseline | v0.9.1-regression-sot-hydration-fix |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,14 +73,15 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 9 — Regression Detection
+Phase 10 — Agent Memory Evaluation
 
 Planned additions:
 
-- ground truth benchmark records
-- test suite objects
-- deterministic evaluation runner
-- run detail endpoint
-- failure taxonomy
-- remediation recommendation
-- evidence record per run
+- memory leakage detection
+- session isolation checks
+- tenant separation checks
+- context expiration checks
+- sensitive retention checks
+- cross-user contamination checks
+- approved memory scope validation
+- SOC 2 Confidentiality and Privacy traceability
