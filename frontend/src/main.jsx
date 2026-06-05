@@ -20,6 +20,9 @@ function App() {
   const [toolVerification, setToolVerification] = useState(null);
   const [policyCompliance, setPolicyCompliance] = useState(null);
   const [regression, setRegression] = useState(null);
+  const [platformMode, setPlatformMode] = useState(null);
+  const [trueModeRequirements, setTrueModeRequirements] = useState(null);
+  const [enterpriseReadinessPosture, setEnterpriseReadinessPosture] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -56,7 +59,10 @@ function App() {
         ragData,
         toolVerificationData,
         policyComplianceData,
-        regressionData
+        regressionData,
+      platformModeData,
+      trueModeRequirementsData,
+      enterpriseReadinessPostureData
       ] = await Promise.all([
         loadJson("/api/dashboard", {}),
         loadJson("/api/agents", []),
@@ -116,7 +122,10 @@ function App() {
         latency_regression_count: 0,
         risk_tier_change_count: 0,
         detections: []
-      })
+      }),
+        loadJson("/api/platform/mode", null),
+        loadJson("/api/platform/truemode-requirements", null),
+        loadJson("/api/platform/enterprise-readiness-posture", null)
       ]);
 
       setDashboard(dashboardData);
@@ -130,6 +139,9 @@ function App() {
       setToolVerification(toolVerificationData);
       setPolicyCompliance(policyComplianceData);
     setRegression(regressionData);
+    setPlatformMode(platformModeData);
+    setTrueModeRequirements(trueModeRequirementsData);
+    setEnterpriseReadinessPosture(enterpriseReadinessPostureData);
 
       setStatus("Live backend connected.");
     } catch {
@@ -907,6 +919,65 @@ function App() {
             This platform does not create new suite membership, enforcement authority,
             runtime authority, SENTINEL bypass behavior, or production agent execution.
           </p>
+        </div>
+      </section>
+
+
+      <section className="shell trueModePanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 10 · TRUE_MODE Enterprise Foundation</p>
+            <h2>Enterprise Platform Mode, Backend Maturity & Production Boundary</h2>
+            <p>
+              The platform is transitioning from feature-rich lab posture toward a standalone enterprise-grade
+              agent evaluation control plane. TRUE_MODE is defined but not active.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>Current Mode</span>
+            <b>{platformMode?.current_mode || "LAB_MODE"}</b>
+          </div>
+        </div>
+
+        <div className="modeGrid">
+          {(platformMode?.available_modes || [
+            { mode: "LAB_MODE", status: "active", description: "Deterministic lab-safe evaluation surface." },
+            { mode: "ENTERPRISE_PREVIEW_MODE", status: "planned", description: "Cloudflare-hosted enterprise preview with demo-safe backend." },
+            { mode: "TRUE_MODE", status: "not_active", description: "Future persistent, tenant-aware, RBAC-controlled enterprise platform." }
+          ]).map((mode) => (
+            <div className="card" key={mode.mode}>
+              <h3>{mode.mode}</h3>
+              <p><b>Status:</b> {mode.status}</p>
+              <p>{mode.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="enterpriseCallout">
+          <h3>TRUE_MODE Entry Criteria</h3>
+          <p>
+            TRUE_MODE requires persistent data, tenant boundaries, identity, RBAC, append-only audit,
+            evidence storage, queue-backed evaluation execution, managed secrets, API versioning,
+            and SOC 2-aligned control evidence tied to real backend events.
+          </p>
+          <p>
+            Target preview domain candidate: <b>{enterpriseReadinessPosture?.target_domain_candidate || "agent-eval.securethecloud.dev"}</b>
+          </p>
+        </div>
+
+        <div className="requirementGrid">
+          {(trueModeRequirements?.requirements || []).map((item) => (
+            <div className="card" key={item.area}>
+              <h3>{item.area}</h3>
+              <p><b>Current:</b> {item.current_state}</p>
+              <p><b>TRUE_MODE:</b> {item.true_mode_requirement}</p>
+              <span className="pill">{item.status}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="drillPath">
+          <b>Enterprise path:</b> LAB_MODE → ENTERPRISE_PREVIEW_MODE → TRUE_MODE → Persistent Evidence Store → Tenant / RBAC → Audit Ledger → Cloudflare Enterprise Preview
         </div>
       </section>
 

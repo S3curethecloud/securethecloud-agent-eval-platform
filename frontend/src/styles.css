@@ -886,3 +886,40 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.trueModePanel {
+  border-color: #22c55e;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.13), transparent 32%),
+    rgba(2, 20, 31, 0.92);
+}
+
+.modeGrid,
+.requirementGrid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.modeGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.requirementGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.enterpriseCallout {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #eab308;
+  border-radius: 1rem;
+  background: rgba(234, 179, 8, 0.08);
+}
+
+@media (max-width: 900px) {
+  .modeGrid,
+  .requirementGrid {
+    grid-template-columns: 1fr;
+  }
+}

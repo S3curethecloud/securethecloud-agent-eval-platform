@@ -2095,3 +2095,105 @@ def regression_detection_detail(run_id: str):
             "production_operating_effectiveness_claimed": False,
         },
     }
+
+
+PLATFORM_MODE = {
+    "current_mode": "LAB_MODE",
+    "available_modes": [
+        {
+            "mode": "LAB_MODE",
+            "status": "active",
+            "description": "Deterministic lab-safe evaluation surface with seeded data and no production systems connected.",
+        },
+        {
+            "mode": "ENTERPRISE_PREVIEW_MODE",
+            "status": "planned",
+            "description": "Public enterprise-style demo posture with Cloudflare frontend, demo-safe backend, and explicit no-production boundary.",
+        },
+        {
+            "mode": "TRUE_MODE",
+            "status": "not_active",
+            "description": "Future enterprise operating posture requiring persistence, tenancy, auth, RBAC, audit ledger, evidence store, and production controls.",
+        },
+    ],
+    "true_mode_active": False,
+    "enterprise_preview_ready": False,
+    "production_authority": False,
+    "runtime_authority": False,
+    "enforcement_authority": False,
+    "soc2_certification_claim": False,
+}
+
+TRUEMODE_REQUIREMENTS = [
+    {
+        "area": "Persistent Data Layer",
+        "current_state": "seeded in-memory data",
+        "true_mode_requirement": "PostgreSQL or managed database with migrations and durable records.",
+        "status": "not_started",
+    },
+    {
+        "area": "Tenant Boundary",
+        "current_state": "simulated boundary only",
+        "true_mode_requirement": "Organizations, workspaces, users, roles, and tenant-scoped records.",
+        "status": "not_started",
+    },
+    {
+        "area": "Identity and RBAC",
+        "current_state": "not connected",
+        "true_mode_requirement": "Authenticated users, role permissions, approval gates, and restricted actions.",
+        "status": "not_started",
+    },
+    {
+        "area": "Evidence Store",
+        "current_state": "rendered deterministic records",
+        "true_mode_requirement": "Persistent evidence packages with prompt, context, tool-call, policy, score, remediation, and reviewer trace.",
+        "status": "not_started",
+    },
+    {
+        "area": "Audit Ledger",
+        "current_state": "documentation and run traceability",
+        "true_mode_requirement": "Append-only audit events with actor, action, object, timestamp, and request metadata.",
+        "status": "not_started",
+    },
+    {
+        "area": "Evaluation Runner",
+        "current_state": "deterministic synchronous evaluation",
+        "true_mode_requirement": "Queue-backed isolated workers with retry, timeout, and budget controls.",
+        "status": "not_started",
+    },
+    {
+        "area": "Cloudflare Enterprise Preview",
+        "current_state": "local or lab deployment",
+        "true_mode_requirement": "Cloudflare Pages frontend, custom domain, environment-gated backend API, and restricted CORS.",
+        "status": "not_started",
+    },
+]
+
+ENTERPRISE_READINESS_POSTURE = {
+    "platform_posture": "Lab-safe platform with enterprise foundation defined",
+    "current_mode": "LAB_MODE",
+    "recommended_next_mode": "ENTERPRISE_PREVIEW_MODE",
+    "target_domain_candidate": "agent-eval.securethecloud.dev",
+    "true_mode_blockers": len(TRUEMODE_REQUIREMENTS),
+    "next_phase": "Phase 11 — Persistent Evidence Store",
+    "next_tag": "v0.11.0-persistent-evidence-store",
+}
+
+
+@app.get("/api/platform/mode")
+def get_platform_mode():
+    return PLATFORM_MODE
+
+
+@app.get("/api/platform/truemode-requirements")
+def get_truemode_requirements():
+    return {
+        "true_mode_active": False,
+        "requirements": TRUEMODE_REQUIREMENTS,
+        "summary": ENTERPRISE_READINESS_POSTURE,
+    }
+
+
+@app.get("/api/platform/enterprise-readiness-posture")
+def get_enterprise_readiness_posture():
+    return ENTERPRISE_READINESS_POSTURE
