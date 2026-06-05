@@ -1101,7 +1101,82 @@ function App() {
 
 
 
-      <section className="shell phase16Panel">
+
+      <section className="shell phase18Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 18 - Enterprise Preview Website & Doctrine-Safe Public Positioning</p>
+            <h2>Agent Evaluation for AI Chaos Harness, Evidence Readiness & Release Assurance</h2>
+            <p>
+              SecureTheCloud Agent Evaluation Platform is a governed Phase 2 AI Chaos Harness and
+              offline evaluation support repository. It helps evaluate autonomous agent behavior,
+              benchmark outcomes, resilience evidence, policy candidates, RAG grounding, tool-call
+              behavior, regression drift, and reviewer-ready evidence packages.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Public Positioning</span>
+            <b>DOCTRINE_SAFE</b>
+          </div>
+        </div>
+
+        <div className="websitePersonaGrid">
+          <div className="card">
+            <h3>For AI Governance Leaders</h3>
+            <p>
+              View evaluation findings, policy candidate evidence, release-readiness posture,
+              and reviewer evidence without granting runtime authority.
+            </p>
+          </div>
+          <div className="card">
+            <h3>For CISOs and Risk Leaders</h3>
+            <p>
+              Inspect tool-call behavior, blocked actions, queue boundaries, tenant/RBAC posture,
+              and evaluation evidence aligned to security readiness.
+            </p>
+          </div>
+          <div className="card">
+            <h3>For Auditors and Reviewers</h3>
+            <p>
+              Review evidence packages, audit ledger traces, export manifests, redaction posture,
+              and SOC 2-aligned readiness evidence only.
+            </p>
+          </div>
+        </div>
+
+        <div className="positioningSplit">
+          <div className="card allowedClaims">
+            <h3>Allowed Enterprise Preview Claims</h3>
+            <p>Phase 2 AI Chaos Harness support lane</p>
+            <p>Offline evaluation and benchmark harness planning</p>
+            <p>Resilience validation and policy candidate evidence</p>
+            <p>Reviewable evidence package surface</p>
+            <p>SOC 2-aligned readiness evidence only</p>
+          </div>
+          <div className="card forbiddenClaims">
+            <h3>Forbidden Claims</h3>
+            <p>Not a new product suite or fifth suite</p>
+            <p>Not an enforcement surface or runtime controller</p>
+            <p>No TRUE_MODE activation</p>
+            <p>No production authority or production mutation</p>
+            <p>No SOC 2 certification or production operating effectiveness claim</p>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>Doctrine-Safe Operating Phrase</h3>
+          <p>
+            Agent Eval recommends. Governance approves. Aegis/OPA/SENTINEL enforce.
+            Black Box preserves evidence.
+          </p>
+        </div>
+
+        <div className="traceLine">
+          Website trace: Enterprise Preview → AI Chaos Harness Support Lane → Offline Evaluation → Evidence Readiness → Governance Handoff → No Runtime Authority
+        </div>
+      </section>
+
+<section className="shell phase16Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 16 - Enterprise Preview Deployment Boundary</p>

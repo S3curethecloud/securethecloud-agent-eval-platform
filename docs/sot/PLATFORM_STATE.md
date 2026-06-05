@@ -104,3 +104,5 @@ TRUE_MODE remains inactive.
 - enterprise preview deployment boundary foundation
 
 - portfolio fit doctrine reconciliation
+
+- enterprise preview website doctrine-safe positioning

@@ -160,3 +160,16 @@ Restores:
 - allowed and forbidden claim boundary
 - diagram mapping
 - local doctrine adoption reconciliation
+
+
+## v0.18.0-enterprise-preview-website-positioning
+
+Phase 18 rollback point for doctrine-safe enterprise preview website positioning.
+
+Restores:
+
+- enterprise preview website positioning documentation
+- allowed public claims
+- forbidden public claims
+- frontend doctrine-safe public positioning panel
+- AI Chaos Harness support-lane public language
