@@ -1,6 +1,6 @@
 # Phase 14 - Evidence Package Export & Reviewer Workspace
 
-**Status:** Phase 14 / Foundation Added  
+**Status:** Phase 14 / Foundation Added
 **Tag:** v0.14.0-evidence-package-reviewer-workspace
 
 ## Purpose
