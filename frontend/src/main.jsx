@@ -18,42 +18,103 @@ function App() {
   const [hallucination, setHallucination] = useState(null);
   const [rag, setRag] = useState(null);
   const [toolVerification, setToolVerification] = useState(null);
+  const [policyCompliance, setPolicyCompliance] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
     try {
-      const [dashRes, agentsRes, runsRes, benchmarksRes, pillarsRes, readinessRes] = await Promise.all([
-        fetch(`${API_BASE}/api/dashboard`),
-        fetch(`${API_BASE}/api/agents`),
-        fetch(`${API_BASE}/api/evaluation-runs`),
-        fetch(`${API_BASE}/api/benchmarks`),
-        fetch(`${API_BASE}/api/evaluation-pillars`),
-        fetch(`${API_BASE}/api/enterprise-readiness`),
-        fetch(`${API_BASE}/api/scoring/hallucination`),
-        fetch(`${API_BASE}/api/rag/evaluations`),
-        fetch(`${API_BASE}/api/tool-verification`)
+      const loadJson = async (path, fallback) => {
+        try {
+          const res = await fetch(`${API_BASE}${path}`);
+
+          if (!res.ok) {
+            throw new Error(`${path} returned ${res.status}`);
+          }
+
+          return await res.json();
+        } catch (err) {
+          console.error("API load failed:", path, err);
+          return fallback;
+        }
+      };
+
+      const asArray = (value, key) => {
+        if (Array.isArray(value)) return value;
+        if (value && Array.isArray(value[key])) return value[key];
+        return [];
+      };
+
+      const [
+        dashboardData,
+        agentsData,
+        runsData,
+        benchmarksData,
+        pillarsData,
+        readinessData,
+        hallucinationData,
+        ragData,
+        toolVerificationData,
+        policyComplianceData
+      ] = await Promise.all([
+        loadJson("/api/dashboard", {}),
+        loadJson("/api/agents", []),
+        loadJson("/api/evaluation-runs", []),
+        loadJson("/api/benchmarks", []),
+        loadJson("/api/evaluation-pillars", []),
+        loadJson("/api/enterprise-readiness", []),
+        loadJson("/api/scoring/hallucination", {
+          average_claim_level_score: 0,
+          average_hallucination_score: 0,
+          unsupported_claims: 0,
+          contradictions: 0,
+          missing_citations: 0,
+          forbidden_source_uses: 0,
+          summaries: []
+        }),
+        loadJson("/api/rag/evaluations", {
+          average_retrieval_precision: 0,
+          average_retrieval_recall: 0,
+          average_citation_accuracy: 0,
+          average_answer_grounding: 0,
+          context_contamination_count: 0,
+          sensitive_source_leakage_count: 0,
+          evaluations: []
+        }),
+        loadJson("/api/tool-verification", {
+          average_tool_verification_score: 0,
+          blocked_tool_attempts: 0,
+          forbidden_tool_attempts: 0,
+          approval_requirements_honored: 0,
+          destructive_actions_blocked: 0,
+          tool_budget_violations: 0,
+          verifications: []
+        }),
+        loadJson("/api/policy/compliance", {
+          outcomes: {
+            PASS: 0,
+            FAIL: 0,
+            "APPROVAL REQUIRED": 0,
+            ESCALATE: 0,
+            BLOCK: 0
+          },
+          governance_board_referrals: 0,
+          frameworks_mapped: [],
+          validations: []
+        })
       ]);
 
-      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok || !ragRes.ok || !toolVerificationRes.ok) {
-        throw new Error("Backend returned non-OK response");
-      }
+      setDashboard(dashboardData);
+      setAgents(asArray(agentsData, "agents"));
+      setRuns(asArray(runsData, "runs"));
+      setBenchmarks(asArray(benchmarksData, "benchmarks"));
+      setPillars(asArray(pillarsData, "pillars"));
+      setReadiness(asArray(readinessData, "readiness"));
+      setHallucination(hallucinationData);
+      setRag(ragData);
+      setToolVerification(toolVerificationData);
+      setPolicyCompliance(policyComplianceData);
 
-      const nextRuns = await runsRes.json();
-
-      setDashboard(await dashRes.json());
-      setAgents(await agentsRes.json());
-      setRuns(nextRuns);
-      setBenchmarks(await benchmarksRes.json());
-      setPillars(await pillarsRes.json());
-      setReadiness(await readinessRes.json());
-      setHallucination(await hallucinationRes.json());
-      setRag(await ragRes.json());
-      setToolVerification(await toolVerificationRes.json());
-      setStatus("Live agent evaluation backend connected");
-
-      if (!selectedRun && nextRuns.length > 0) {
-        await loadRunDetail(nextRuns[0].run_id);
-      }
+      setStatus("Live backend connected.");
     } catch {
       setStatus("Backend connection failed. Demo shell loaded.");
     }
@@ -152,7 +213,7 @@ function App() {
           Flagship evaluation layer for agent quality, safety, tool behavior, RAG grounding, policy compliance, regression control, and evidence traceability.
         </p>
         <div className="fabricGrid">
-          {pillars.map((pillar) => (
+          {(pillars || []).map((pillar) => (
             <div className="card fabricCard" key={pillar.name}>
               <div className="hex">⬡</div>
               <h3>{pillar.name}</h3>
@@ -195,7 +256,7 @@ function App() {
           <label>
             Agent
             <select value={selectedAgentId} onChange={(event) => setSelectedAgentId(event.target.value)}>
-              {agents.map((agent) => (
+              {(agents || []).map((agent) => (
                 <option key={agent.agent_id} value={agent.agent_id}>
                   {agent.agent_name}
                 </option>
@@ -206,7 +267,7 @@ function App() {
           <label>
             Benchmark
             <select value={selectedBenchmarkId} onChange={(event) => setSelectedBenchmarkId(event.target.value)}>
-              {benchmarks.map((benchmark) => (
+              {(benchmarks || []).map((benchmark) => (
                 <option key={benchmark.benchmark_id} value={benchmark.benchmark_id}>
                   {benchmark.test_id}
                 </option>
@@ -220,7 +281,7 @@ function App() {
         </div>
 
         <div className="benchmarkGrid">
-          {benchmarks.map((benchmark) => (
+          {(benchmarks || []).map((benchmark) => (
             <button
               key={benchmark.benchmark_id}
               className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
@@ -232,6 +293,85 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="shell policyPanel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">PHASE 8 · POLICY COMPLIANCE VALIDATOR</p>
+            <h2>Governance, Compliance & Audit Readiness Mapping</h2>
+            <p>
+              Policy compliance validation maps each agent evaluation run to NIST AI RMF,
+              Responsible AI, SOC 2 readiness, HIPAA-style controls, internal AI policy,
+              and model risk management outcomes.
+            </p>
+          </div>
+          <div className="postureBox">
+            <span>AI Governance Board Bridge</span>
+            <b>{policyCompliance ? `${policyCompliance.governance_board_referrals} referrals` : "Loading"}</b>
+          </div>
+        </div>
+
+        {policyCompliance && (
+          <>
+            <div className="policyMetrics">
+              {[
+                ["PASS", policyCompliance.outcomes.PASS],
+                ["FAIL", policyCompliance.outcomes.FAIL],
+                ["APPROVAL REQUIRED", policyCompliance.outcomes["APPROVAL REQUIRED"]],
+                ["ESCALATE", policyCompliance.outcomes.ESCALATE],
+                ["BLOCK", policyCompliance.outcomes.BLOCK],
+                ["Board Referrals", policyCompliance.governance_board_referrals]
+              ].map(([label, value]) => (
+                <div className="metric" key={label}>
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="governanceBridge">
+              <h3>Connection to SecureTheCloud AI Governance Board</h3>
+              <p>
+                Agent Evaluation Platform validates agent behavior and evidence. AI Governance Board is the
+                natural review surface for approval, escalation, risk decisioning, required controls, and
+                board-ready evidence package review.
+              </p>
+            </div>
+
+            <div className="frameworkStrip">
+              {(policyCompliance.frameworks_mapped || []).map((framework) => (
+                <span className="sourceChip allowedSource" key={framework}>{framework}</span>
+              ))}
+            </div>
+
+            <div className="policyGrid">
+              {(policyCompliance.validations || []).map((validation) => (
+                <button
+                  className={validation.policy_outcome === "PASS" ? "card policyCard pass" : "card policyCard fail"}
+                  key={validation.policy_validation_id}
+                  onClick={() => loadRunDetail(validation.run_id)}
+                >
+                  <div className="row">
+                    <h3>{validation.policy_validation_id}</h3>
+                    <span className="pill">{validation.policy_outcome}</span>
+                  </div>
+                  <p>Run: <b>{validation.run_id}</b></p>
+                  <p>Risk: <b>{validation.risk_classification}</b></p>
+                  <p>Expected policy: <b>{validation.expected_policy_decision}</b></p>
+                  <p>Failed controls: <b>{validation.failed_controls.length}</b></p>
+                  <p>Required controls: <b>{validation.required_controls.length}</b></p>
+                  <p>Board referral: <b>{validation.governance_board_referral ? "yes" : "no"}</b></p>
+                  <p className="failure">{validation.escalation_reason}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="drillPath">
+          <b>Policy trace:</b> Run → Benchmark → Framework Mapping → Failed Controls → Outcome → Governance Board Referral → Evidence
         </div>
       </section>
 
@@ -279,7 +419,7 @@ function App() {
             </div>
 
             <div className="toolGrid">
-              {toolVerification.verifications.map((verification) => (
+              {(toolVerification.verifications || []).map((verification) => (
                 <button
                   className={verification.verification_result === "pass" ? "card toolCard pass" : "card toolCard fail"}
                   key={verification.tool_verification_id}
@@ -342,7 +482,7 @@ function App() {
             </div>
 
             <div className="ragGrid">
-              {rag.evaluations.map((evaluation) => (
+              {(rag.evaluations || []).map((evaluation) => (
                 <button
                   className={evaluation.context_contamination ? "card ragCard fail" : "card ragCard pass"}
                   key={evaluation.rag_eval_id}
@@ -404,7 +544,7 @@ function App() {
             </div>
 
             <div className="claimGrid">
-              {hallucination.summaries.map((summary) => (
+              {(hallucination.summaries || []).map((summary) => (
                 <button
                   className="card selectableCard"
                   key={summary.run_id}
@@ -442,13 +582,13 @@ function App() {
           </div>
           <div className="postureBox">
             <span>Benchmark Coverage</span>
-            <b>{benchmarks.length} traceable records</b>
+            <b>{(benchmarks || []).length} traceable records</b>
           </div>
         </div>
 
         <div className="groundTruthGrid">
           <div className="stack">
-            {benchmarks.map((benchmark) => (
+            {(benchmarks || []).map((benchmark) => (
               <button
                 key={benchmark.benchmark_id}
                 className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
@@ -509,7 +649,7 @@ function App() {
           <p>{status}</p>
 
           <div className="stack">
-            {runs.map((run) => (
+            {(runs || []).map((run) => (
               <button
                 className={`card runCard ${run.result === "pass" ? "pass" : "fail"}`}
                 key={run.run_id}
