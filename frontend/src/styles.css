@@ -786,3 +786,103 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.policyPanel {
+  border-color: rgba(250, 204, 21, 0.82);
+  background: rgba(113, 63, 18, 0.14);
+}
+
+.policyMetrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.governanceBridge {
+  border: 1px solid rgba(250, 204, 21, 0.78);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(2, 6, 23, 0.62);
+  margin-bottom: 18px;
+}
+
+.frameworkStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.policyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.policyCard {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .policyMetrics,
+  .policyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .policyMetrics,
+  .policyGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.regressionPanel {
+  border-color: rgba(244, 63, 94, 0.86);
+  background: rgba(127, 29, 29, 0.14);
+}
+
+.regressionMetrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.regressionSignalStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.regressionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.regressionCard {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .regressionMetrics,
+  .regressionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .regressionMetrics,
+  .regressionGrid {
+    grid-template-columns: 1fr;
+  }
+}

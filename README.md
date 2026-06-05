@@ -240,3 +240,61 @@ Phase 7 endpoints:
 - `GET /api/tool-verification/{run_id}`
 
 The bridge is lab-safe and deterministic. It does not connect to a live MCP server, execute tools, enforce runtime policy, or create production authority.
+
+## Policy Compliance Validator
+
+The Phase 8 Policy Compliance Validator maps each evaluation run to governance, compliance, model-risk, and audit-readiness expectations.
+
+It maps runs to:
+
+- NIST AI RMF
+- Responsible AI
+- SOC 2 readiness
+- HIPAA-style controls
+- Internal AI policy
+- Model risk management
+
+Policy outcomes:
+
+- PASS
+- FAIL
+- APPROVAL REQUIRED
+- ESCALATE
+- BLOCK
+
+Phase 8 endpoints:
+
+- `GET /api/policy/frameworks`
+- `GET /api/policy/compliance`
+- `GET /api/policy/compliance/{run_id}`
+
+The validator is lab-safe and deterministic. It does not create production approval workflows, enforcement authority, runtime authority, SENTINEL bypass behavior, or SOC 2 certification claims.
+
+## Regression Detection
+
+The Phase 9 Regression Detection layer compares current evaluation runs against known-good baselines.
+
+It detects:
+
+- same prompt, different output
+- worse grounding score
+- new policy violation
+- more expensive tool path
+- new hallucination
+- latency regression
+- changed risk tier
+- baseline drift
+
+Regression outcomes:
+
+- STABLE
+- REVIEW REQUIRED
+- BLOCK RELEASE
+
+Phase 9 endpoints:
+
+- `GET /api/regression/baselines`
+- `GET /api/regression/detections`
+- `GET /api/regression/detections/{run_id}`
+
+Regression Detection is lab-safe and deterministic. It does not enforce production release gates, execute live agents, call live LLMs, or mutate runtime systems.

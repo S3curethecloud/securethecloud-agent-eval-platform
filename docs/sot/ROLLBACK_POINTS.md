@@ -60,3 +60,7 @@ Current platform is lab-safe and does not contain production runtime state.
 | v0.6.0-rag-evaluation-suite | RAG Evaluation Suite | Adds retrieval precision, citation accuracy, grounding, contamination, and leakage evidence |
 
 | v0.7.0-tool-call-verification | Tool-Call Verification | Adds MCP Governance Lab bridge, tool policy registry, destructive-action blocking, and SOC 2 Security traceability |
+
+| v0.8.0-policy-compliance-validator | Policy Compliance Validator | Adds framework mapping, governance board referral, policy outcomes, and SOC 2 readiness traceability |
+
+| v0.9.0-regression-detection | Regression Detection | Adds known-good baselines, baseline drift, release recommendations, and SOC 2 change-management traceability |

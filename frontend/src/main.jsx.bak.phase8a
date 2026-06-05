@@ -19,118 +19,44 @@ function App() {
   const [rag, setRag] = useState(null);
   const [toolVerification, setToolVerification] = useState(null);
   const [policyCompliance, setPolicyCompliance] = useState(null);
-  const [regression, setRegression] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
     try {
-      const loadJson = async (path, fallback) => {
-        try {
-          const res = await fetch(`${API_BASE}${path}`);
-
-          if (!res.ok) {
-            throw new Error(`${path} returned ${res.status}`);
-          }
-
-          return await res.json();
-        } catch (err) {
-          console.error("API load failed:", path, err);
-          return fallback;
-        }
-      };
-
-      const asArray = (value, key) => {
-        if (Array.isArray(value)) return value;
-        if (value && Array.isArray(value[key])) return value[key];
-        return [];
-      };
-
-      const [
-        dashboardData,
-        agentsData,
-        runsData,
-        benchmarksData,
-        pillarsData,
-        readinessData,
-        hallucinationData,
-        ragData,
-        toolVerificationData,
-        policyComplianceData
-      ] = await Promise.all([
-        loadJson("/api/dashboard", {}),
-        loadJson("/api/agents", []),
-        loadJson("/api/evaluation-runs", []),
-        loadJson("/api/benchmarks", []),
-        loadJson("/api/evaluation-pillars", []),
-        loadJson("/api/enterprise-readiness", []),
-        loadJson("/api/scoring/hallucination", {
-          average_claim_level_score: 0,
-          average_hallucination_score: 0,
-          unsupported_claims: 0,
-          contradictions: 0,
-          missing_citations: 0,
-          forbidden_source_uses: 0,
-          summaries: []
-        }),
-        loadJson("/api/rag/evaluations", {
-          average_retrieval_precision: 0,
-          average_retrieval_recall: 0,
-          average_citation_accuracy: 0,
-          average_answer_grounding: 0,
-          context_contamination_count: 0,
-          sensitive_source_leakage_count: 0,
-          evaluations: []
-        }),
-        loadJson("/api/tool-verification", {
-          average_tool_verification_score: 0,
-          blocked_tool_attempts: 0,
-          forbidden_tool_attempts: 0,
-          approval_requirements_honored: 0,
-          destructive_actions_blocked: 0,
-          tool_budget_violations: 0,
-          verifications: []
-        }),
-        loadJson("/api/policy/compliance", {
-          outcomes: {
-            PASS: 0,
-            FAIL: 0,
-            "APPROVAL REQUIRED": 0,
-            ESCALATE: 0,
-            BLOCK: 0
-          },
-          governance_board_referrals: 0,
-          frameworks_mapped: [],
-          validations: []
-        }),
-      loadJson("/api/regression/detections", {
-        stable_runs: 0,
-        review_required: 0,
-        blocked_releases: 0,
-        baseline_drift_count: 0,
-        same_prompt_different_output_count: 0,
-        worse_grounding_count: 0,
-        new_policy_violation_count: 0,
-        cost_regression_count: 0,
-        new_hallucination_count: 0,
-        latency_regression_count: 0,
-        risk_tier_change_count: 0,
-        detections: []
-      })
+      const [dashRes, agentsRes, runsRes, benchmarksRes, pillarsRes, readinessRes] = await Promise.all([
+        fetch(`${API_BASE}/api/dashboard`),
+        fetch(`${API_BASE}/api/agents`),
+        fetch(`${API_BASE}/api/evaluation-runs`),
+        fetch(`${API_BASE}/api/benchmarks`),
+        fetch(`${API_BASE}/api/evaluation-pillars`),
+        fetch(`${API_BASE}/api/enterprise-readiness`),
+        fetch(`${API_BASE}/api/scoring/hallucination`),
+        fetch(`${API_BASE}/api/rag/evaluations`),
+        fetch(`${API_BASE}/api/tool-verification`),
+        fetch(`${API_BASE}/api/policy/compliance`)
       ]);
 
-      setDashboard(dashboardData);
-      setAgents(asArray(agentsData, "agents"));
-      setRuns(asArray(runsData, "runs"));
-      setBenchmarks(asArray(benchmarksData, "benchmarks"));
-      setPillars(asArray(pillarsData, "pillars"));
-      setReadiness(asArray(readinessData, "readiness"));
-      setHallucination(hallucinationData);
-      setRag(ragData);
-      setToolVerification(toolVerificationData);
-      setPolicyCompliance(policyComplianceData);
-    setRegression(regressionData);
+      if (!dashRes.ok || !agentsRes.ok || !runsRes.ok || !benchmarksRes.ok || !pillarsRes.ok || !readinessRes.ok || !hallucinationRes.ok || !ragRes.ok || !toolVerificationRes.ok || !policyComplianceRes.ok) {
+        throw new Error("Backend returned non-OK response");
+      }
 
-      setStatus("Live backend connected.");
+      const nextRuns = await runsRes.json();
+
+      setDashboard(await dashRes.json());
+      setAgents(await agentsRes.json());
+      setRuns(nextRuns);
+      setBenchmarks(await benchmarksRes.json());
+      setPillars(await pillarsRes.json());
+      setReadiness(await readinessRes.json());
+      setHallucination(await hallucinationRes.json());
+      setRag(await ragRes.json());
+      setToolVerification(await toolVerificationRes.json());
+      setPolicyCompliance(await policyComplianceRes.json());
+      setStatus("Live agent evaluation backend connected");
+
+      if (!selectedRun && nextRuns.length > 0) {
+        await loadRunDetail(nextRuns[0].run_id);
+      }
     } catch {
       setStatus("Backend connection failed. Demo shell loaded.");
     }
@@ -229,7 +155,7 @@ function App() {
           Flagship evaluation layer for agent quality, safety, tool behavior, RAG grounding, policy compliance, regression control, and evidence traceability.
         </p>
         <div className="fabricGrid">
-          {(pillars || []).map((pillar) => (
+          {pillars.map((pillar) => (
             <div className="card fabricCard" key={pillar.name}>
               <div className="hex">⬡</div>
               <h3>{pillar.name}</h3>
@@ -272,7 +198,7 @@ function App() {
           <label>
             Agent
             <select value={selectedAgentId} onChange={(event) => setSelectedAgentId(event.target.value)}>
-              {(agents || []).map((agent) => (
+              {agents.map((agent) => (
                 <option key={agent.agent_id} value={agent.agent_id}>
                   {agent.agent_name}
                 </option>
@@ -283,7 +209,7 @@ function App() {
           <label>
             Benchmark
             <select value={selectedBenchmarkId} onChange={(event) => setSelectedBenchmarkId(event.target.value)}>
-              {(benchmarks || []).map((benchmark) => (
+              {benchmarks.map((benchmark) => (
                 <option key={benchmark.benchmark_id} value={benchmark.benchmark_id}>
                   {benchmark.test_id}
                 </option>
@@ -297,7 +223,7 @@ function App() {
         </div>
 
         <div className="benchmarkGrid">
-          {(benchmarks || []).map((benchmark) => (
+          {benchmarks.map((benchmark) => (
             <button
               key={benchmark.benchmark_id}
               className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
@@ -309,83 +235,6 @@ function App() {
               <p>Risk: <b>{benchmark.risk_classification}</b></p>
             </button>
           ))}
-        </div>
-      </section>
-
-      <section className="shell regressionPanel">
-        <div className="sectionHeader">
-          <div>
-            <p className="eyebrow">PHASE 9 · REGRESSION DETECTION</p>
-            <h2>Known-Good Baseline Drift & Release Risk</h2>
-            <p>
-              Regression Detection compares current agent evaluation runs against known-good baselines to detect
-              output drift, worse grounding, new policy violations, cost or latency regression, new hallucination,
-              changed risk tier, and baseline drift.
-            </p>
-          </div>
-          <div className="postureBox">
-            <span>Release Gate Posture</span>
-            <b>{regression ? `${regression.blocked_releases} blocked` : "Loading"}</b>
-          </div>
-        </div>
-
-        {regression && (
-          <>
-            <div className="regressionMetrics">
-              {[
-                ["Stable", regression.stable_runs],
-                ["Review Required", regression.review_required],
-                ["Blocked", regression.blocked_releases],
-                ["Baseline Drift", regression.baseline_drift_count],
-                ["Policy Regressions", regression.new_policy_violation_count],
-                ["Latency Regressions", regression.latency_regression_count]
-              ].map(([label, value]) => (
-                <div className="metric" key={label}>
-                  <strong>{value}</strong>
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="regressionSignalStrip">
-              {[
-                ["Same Prompt / Different Output", regression.same_prompt_different_output_count],
-                ["Worse Grounding", regression.worse_grounding_count],
-                ["Cost Regression", regression.cost_regression_count],
-                ["New Hallucination", regression.new_hallucination_count],
-                ["Risk Tier Change", regression.risk_tier_change_count]
-              ].map(([label, value]) => (
-                <span className="sourceChip forbiddenSource" key={label}>{label}: {value}</span>
-              ))}
-            </div>
-
-            <div className="regressionGrid">
-              {(regression.detections || []).map((detection) => (
-                <button
-                  className={detection.release_recommendation === "STABLE" ? "card regressionCard pass" : "card regressionCard fail"}
-                  key={detection.regression_detection_id}
-                  onClick={() => loadRunDetail(detection.run_id)}
-                >
-                  <div className="row">
-                    <h3>{detection.regression_detection_id}</h3>
-                    <span className="pill">{detection.release_recommendation}</span>
-                  </div>
-                  <p>Run: <b>{detection.run_id}</b></p>
-                  <p>Baseline: <b>{detection.baseline_id}</b></p>
-                  <p>Findings: <b>{detection.finding_count}</b></p>
-                  <p>Output drift: <b>{detection.same_prompt_different_output ? "yes" : "no"}</b></p>
-                  <p>Grounding regression: <b>{detection.worse_grounding_score ? "yes" : "no"}</b></p>
-                  <p>Policy regression: <b>{detection.new_policy_violation ? "yes" : "no"}</b></p>
-                  <p>Risk tier changed: <b>{detection.changed_risk_tier ? "yes" : "no"}</b></p>
-                  <p className="failure">{detection.remediation_guidance}</p>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className="drillPath">
-          <b>Regression trace:</b> Baseline → Current Run → Prompt → Output → Scores → Policy → Cost / Latency → Risk Tier → Release Decision → Evidence
         </div>
       </section>
 
@@ -434,13 +283,13 @@ function App() {
             </div>
 
             <div className="frameworkStrip">
-              {(policyCompliance.frameworks_mapped || []).map((framework) => (
+              {policyCompliance.frameworks_mapped.map((framework) => (
                 <span className="sourceChip allowedSource" key={framework}>{framework}</span>
               ))}
             </div>
 
             <div className="policyGrid">
-              {(policyCompliance.validations || []).map((validation) => (
+              {policyCompliance.validations.map((validation) => (
                 <button
                   className={validation.policy_outcome === "PASS" ? "card policyCard pass" : "card policyCard fail"}
                   key={validation.policy_validation_id}
@@ -512,7 +361,7 @@ function App() {
             </div>
 
             <div className="toolGrid">
-              {(toolVerification.verifications || []).map((verification) => (
+              {toolVerification.verifications.map((verification) => (
                 <button
                   className={verification.verification_result === "pass" ? "card toolCard pass" : "card toolCard fail"}
                   key={verification.tool_verification_id}
@@ -575,7 +424,7 @@ function App() {
             </div>
 
             <div className="ragGrid">
-              {(rag.evaluations || []).map((evaluation) => (
+              {rag.evaluations.map((evaluation) => (
                 <button
                   className={evaluation.context_contamination ? "card ragCard fail" : "card ragCard pass"}
                   key={evaluation.rag_eval_id}
@@ -637,7 +486,7 @@ function App() {
             </div>
 
             <div className="claimGrid">
-              {(hallucination.summaries || []).map((summary) => (
+              {hallucination.summaries.map((summary) => (
                 <button
                   className="card selectableCard"
                   key={summary.run_id}
@@ -675,13 +524,13 @@ function App() {
           </div>
           <div className="postureBox">
             <span>Benchmark Coverage</span>
-            <b>{(benchmarks || []).length} traceable records</b>
+            <b>{benchmarks.length} traceable records</b>
           </div>
         </div>
 
         <div className="groundTruthGrid">
           <div className="stack">
-            {(benchmarks || []).map((benchmark) => (
+            {benchmarks.map((benchmark) => (
               <button
                 key={benchmark.benchmark_id}
                 className={selectedBenchmarkId === benchmark.benchmark_id ? "card selectedCard" : "card selectableCard"}
@@ -742,7 +591,7 @@ function App() {
           <p>{status}</p>
 
           <div className="stack">
-            {(runs || []).map((run) => (
+            {runs.map((run) => (
               <button
                 className={`card runCard ${run.result === "pass" ? "pass" : "fail"}`}
                 key={run.run_id}
