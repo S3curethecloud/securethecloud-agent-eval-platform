@@ -187,3 +187,18 @@ Restores:
 - planning-only adversarial scenario boundary
 - frontend AI Chaos Harness planning panel
 - doctrine-safe no-runtime/no-production boundary
+
+
+## v0.20.0-offline-resilience-validation-evidence
+
+Phase 20 rollback point for offline resilience validation evidence.
+
+Restores:
+
+- offline resilience validation records
+- expected resilience signal checks
+- observed offline evidence fields
+- validation outcome model
+- policy candidate readiness status
+- frontend Offline Resilience Validation panel
+- no-live-execution validation boundary

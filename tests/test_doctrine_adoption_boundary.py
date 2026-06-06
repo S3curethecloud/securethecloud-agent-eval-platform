@@ -106,3 +106,22 @@ def test_ai_chaos_planning_surface_preserves_non_runtime_boundary():
 
     for phrase in required_phrases:
         assert phrase in doc
+
+
+def test_offline_resilience_validation_preserves_boundary():
+    from pathlib import Path
+
+    doc = Path("docs/resilience/OFFLINE_RESILIENCE_VALIDATION_EVIDENCE.md").read_text()
+
+    required_phrases = [
+        "Offline resilience validation evidence is generated from planning records and deterministic evidence references only.",
+        "No live adversarial traffic",
+        "production mutation",
+        "autonomous tool execution",
+        "Aegis/OPA/SENTINEL policy update",
+        "Black Box custody bypass",
+        "TRUE_MODE activation",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in doc

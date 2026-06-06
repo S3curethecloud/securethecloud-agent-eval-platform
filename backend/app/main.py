@@ -28,8 +28,9 @@ from app.models import (
     AIChaosScenarioRecord,
     AIChaosSimulationPlanRecord,
     AIChaosEvidenceReferenceRecord,
+    OfflineResilienceValidationRecord,
 )
-from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary, seed_enterprise_preview_deployment_boundary, seed_ai_chaos_harness_planning_surface
+from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_boundary, seed_audit_evidence_ledger, seed_evidence_package_reviewer_workspace, seed_queue_backed_evaluation_runner_boundary, seed_enterprise_preview_deployment_boundary, seed_ai_chaos_harness_planning_surface, seed_offline_resilience_validation_evidence
 from pydantic import BaseModel
 
 
@@ -52,6 +53,7 @@ def startup_persistent_evidence_store():
         seed_queue_backed_evaluation_runner_boundary(db)
         seed_enterprise_preview_deployment_boundary(db)
         seed_ai_chaos_harness_planning_surface(db)
+        seed_offline_resilience_validation_evidence(db)
     finally:
         db.close()
 
@@ -2941,4 +2943,95 @@ def get_ai_chaos_evidence_references(db: Session = Depends(get_db)):
             }
             for ref in references
         ],
+    }
+
+
+@app.get("/api/v1/ai-chaos/resilience-validations")
+def get_offline_resilience_validations(db: Session = Depends(get_db)):
+    validations = db.query(OfflineResilienceValidationRecord).all()
+
+    return {
+        "phase": "20",
+        "foundation_status": "FOUNDATION_ADDED",
+        "validation_count": len(validations),
+        "execution_posture": "OFFLINE_VALIDATION_ONLY",
+        "evidence_source_posture": "deterministic_evidence_reference_only",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "live_autonomous_execution": "not_active",
+        "runtime_mutation": "not_granted",
+        "policy_mutation": "not_granted",
+        "black_box_custody_bypass": "not_allowed",
+        "validations": [
+            {
+                "validation_id": validation.validation_id,
+                "scenario_id": validation.scenario_id,
+                "simulation_plan_id": validation.simulation_plan_id,
+                "tenant_id": validation.tenant_id,
+                "workspace_id": validation.workspace_id,
+                "validation_name": validation.validation_name,
+                "expected_resilience_signal": validation.expected_resilience_signal,
+                "observed_offline_evidence": validation.observed_offline_evidence,
+                "signal_check_status": validation.signal_check_status,
+                "validation_outcome": validation.validation_outcome,
+                "policy_candidate_readiness": validation.policy_candidate_readiness,
+                "governance_handoff_readiness": validation.governance_handoff_readiness,
+                "black_box_replay_reference": validation.black_box_replay_reference,
+                "riskdna_feedback_reference": validation.riskdna_feedback_reference,
+                "evidence_source_posture": validation.evidence_source_posture,
+                "execution_posture": validation.execution_posture,
+                "boundary_statement": validation.boundary_statement,
+                "soc2_mapping": validation.soc2_mapping,
+            }
+            for validation in validations
+        ],
+    }
+
+
+@app.get("/api/v1/ai-chaos/resilience-validations/{validation_id}")
+def get_offline_resilience_validation(validation_id: str, db: Session = Depends(get_db)):
+    validation = db.query(OfflineResilienceValidationRecord).filter(
+        OfflineResilienceValidationRecord.validation_id == validation_id
+    ).first()
+
+    if not validation:
+        return {
+            "phase": "20",
+            "foundation_status": "FOUNDATION_ADDED",
+            "found": False,
+            "validation_id": validation_id,
+            "message": "Offline resilience validation not found.",
+        }
+
+    return {
+        "phase": "20",
+        "foundation_status": "FOUNDATION_ADDED",
+        "found": True,
+        "execution_posture": "OFFLINE_VALIDATION_ONLY",
+        "true_mode": "not_active",
+        "production_authority": "not_granted",
+        "live_autonomous_execution": "not_active",
+        "runtime_mutation": "not_granted",
+        "policy_mutation": "not_granted",
+        "black_box_custody_bypass": "not_allowed",
+        "validation": {
+            "validation_id": validation.validation_id,
+            "scenario_id": validation.scenario_id,
+            "simulation_plan_id": validation.simulation_plan_id,
+            "tenant_id": validation.tenant_id,
+            "workspace_id": validation.workspace_id,
+            "validation_name": validation.validation_name,
+            "expected_resilience_signal": validation.expected_resilience_signal,
+            "observed_offline_evidence": validation.observed_offline_evidence,
+            "signal_check_status": validation.signal_check_status,
+            "validation_outcome": validation.validation_outcome,
+            "policy_candidate_readiness": validation.policy_candidate_readiness,
+            "governance_handoff_readiness": validation.governance_handoff_readiness,
+            "black_box_replay_reference": validation.black_box_replay_reference,
+            "riskdna_feedback_reference": validation.riskdna_feedback_reference,
+            "evidence_source_posture": validation.evidence_source_posture,
+            "execution_posture": validation.execution_posture,
+            "boundary_statement": validation.boundary_statement,
+            "soc2_mapping": validation.soc2_mapping,
+        },
     }

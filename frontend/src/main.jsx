@@ -36,6 +36,7 @@ function App() {
   const [aiChaosScenarios, setAiChaosScenarios] = useState(null);
   const [aiChaosPlans, setAiChaosPlans] = useState(null);
   const [aiChaosReferences, setAiChaosReferences] = useState(null);
+  const [resilienceValidations, setResilienceValidations] = useState(null);
   const [runStatus, setRunStatus] = useState("Ready to run deterministic lab evaluation.");
 
   async function load() {
@@ -353,6 +354,24 @@ function App() {
     };
 
     hydrateAIChaosHarness();
+  }, []);
+
+
+  // phase20OfflineResilienceValidationHydration
+  useEffect(() => {
+    const hydrateOfflineResilienceValidations = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/ai-chaos/resilience-validations`);
+
+        if (response.ok) {
+          setResilienceValidations(await response.json());
+        }
+      } catch (error) {
+        console.warn("Phase 20 offline resilience validation hydration failed", error);
+      }
+    };
+
+    hydrateOfflineResilienceValidations();
   }, []);
 
   return (
@@ -1136,7 +1155,75 @@ function App() {
 
 
 
-      <section className="shell phase19Panel">
+
+      <section className="shell phase20Panel">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">Phase 20 - Offline Resilience Validation Evidence</p>
+            <h2>Expected Signals, Offline Evidence & Policy Candidate Readiness</h2>
+            <p>
+              Offline resilience validation evidence is generated from planning records and deterministic
+              evidence references only. No live adversarial traffic, production mutation, autonomous tool
+              execution, Aegis/OPA/SENTINEL policy update, Black Box custody bypass, or TRUE_MODE activation is active.
+            </p>
+          </div>
+          <div className="statusCard phase12StatusCard">
+            <span>Resilience Validation</span>
+            <b>{resilienceValidations?.execution_posture || "Loading"}</b>
+          </div>
+        </div>
+
+        <div className="ledgerMetrics">
+          <div className="metricCard ledgerMetricCard">
+            <b>{resilienceValidations?.validation_count ?? 0}</b>
+            <span>Validations</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{resilienceValidations?.evidence_source_posture || "pending"}</b>
+            <span>Evidence Source</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{resilienceValidations?.policy_mutation || "not_granted"}</b>
+            <span>Policy Mutation</span>
+          </div>
+          <div className="metricCard ledgerMetricCard">
+            <b>{resilienceValidations?.black_box_custody_bypass || "not_allowed"}</b>
+            <span>Black Box Custody Bypass</span>
+          </div>
+        </div>
+
+        <div className="reviewerBoundary">
+          <h3>Validation Boundary</h3>
+          <p>
+            Scenario → Simulation Plan → Expected Signal → Observed Offline Evidence →
+            Validation Outcome → Policy Candidate Readiness → Governance Handoff
+          </p>
+        </div>
+
+        <div className="ledgerGrid">
+          {(resilienceValidations?.validations || []).map((validation) => (
+            <div className="card ledgerCard" key={validation.validation_id}>
+              <div className="cardTitleRow">
+                <h3>{validation.validation_name}</h3>
+                <span className="pill good">{validation.signal_check_status}</span>
+              </div>
+              <p>Scenario: <b>{validation.scenario_id}</b></p>
+              <p>Outcome: <b>{validation.validation_outcome}</b></p>
+              <p>Policy Candidate: <b>{validation.policy_candidate_readiness}</b></p>
+              <p>Governance Handoff: <b>{validation.governance_handoff_readiness}</b></p>
+              <p>Black Box Ref: <b>{validation.black_box_replay_reference}</b></p>
+              <p>RiskDNA Ref: <b>{validation.riskdna_feedback_reference}</b></p>
+              <p className="remediation">{validation.expected_resilience_signal}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="traceLine">
+          Resilience trace: Scenario → Plan → Expected Signal → Offline Evidence → Outcome → Policy Candidate Readiness → Governance Handoff
+        </div>
+      </section>
+
+<section className="shell phase19Panel">
         <div className="sectionHeader">
           <div>
             <p className="eyebrow">Phase 19 - AI Chaos Harness Planning Surface</p>

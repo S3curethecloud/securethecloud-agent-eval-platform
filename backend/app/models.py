@@ -375,3 +375,27 @@ class AIChaosEvidenceReferenceRecord(Base):
     mutation_authority = Column(String(120), nullable=False)
     notes = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class OfflineResilienceValidationRecord(Base):
+    __tablename__ = "offline_resilience_validation_records"
+
+    validation_id = Column(String(180), primary_key=True, index=True)
+    scenario_id = Column(String(160), index=True, nullable=False)
+    simulation_plan_id = Column(String(160), index=True, nullable=False)
+    tenant_id = Column(String(80), index=True, nullable=False)
+    workspace_id = Column(String(120), index=True, nullable=False)
+    validation_name = Column(String(220), nullable=False)
+    expected_resilience_signal = Column(String(260), nullable=False)
+    observed_offline_evidence = Column(JSON, default=dict, nullable=False)
+    signal_check_status = Column(String(120), nullable=False)
+    validation_outcome = Column(String(120), nullable=False)
+    policy_candidate_readiness = Column(String(160), nullable=False)
+    governance_handoff_readiness = Column(String(160), nullable=False)
+    black_box_replay_reference = Column(String(220), nullable=False)
+    riskdna_feedback_reference = Column(String(220), nullable=False)
+    evidence_source_posture = Column(String(180), nullable=False)
+    execution_posture = Column(String(180), nullable=False)
+    boundary_statement = Column(Text, nullable=False)
+    soc2_mapping = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

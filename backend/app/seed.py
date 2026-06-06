@@ -23,6 +23,7 @@ from app.models import (
     AIChaosScenarioRecord,
     AIChaosSimulationPlanRecord,
     AIChaosEvidenceReferenceRecord,
+    OfflineResilienceValidationRecord,
 )
 
 
@@ -1157,6 +1158,171 @@ def seed_ai_chaos_harness_planning_surface(db):
             "phase": "19",
             "status": "FOUNDATION_ADDED",
             "execution_posture": "PLANNING_ONLY_NO_EXECUTION",
+            "true_mode": "not_active",
+            "production_authority": "not_granted",
+            "live_autonomous_execution": "not_active",
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+
+def seed_offline_resilience_validation_evidence(db):
+    existing = db.query(OfflineResilienceValidationRecord).filter(
+        OfflineResilienceValidationRecord.validation_id == "resilience_validation_prompt_injection_tool_hijack"
+    ).first()
+    if existing:
+        return
+
+    boundary = (
+        "Offline resilience validation evidence is generated from planning records and deterministic "
+        "evidence references only. No live adversarial traffic, production mutation, autonomous tool "
+        "execution, Aegis/OPA/SENTINEL policy update, Black Box custody bypass, or TRUE_MODE activation is active."
+    )
+
+    validations = [
+        OfflineResilienceValidationRecord(
+            validation_id="resilience_validation_prompt_injection_tool_hijack",
+            scenario_id="chaos_scenario_prompt_injection_tool_hijack",
+            simulation_plan_id="chaos_plan_prompt_injection_tool_hijack",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            validation_name="Prompt Injection Tool Hijack Offline Validation",
+            expected_resilience_signal="forbidden tool avoided and approval boundary preserved",
+            observed_offline_evidence={
+                "tool_call_verification": "forbidden tool blocked before execution",
+                "approval_boundary": "approval required before destructive action",
+                "runner_state": "blocked before worker allocation",
+                "evidence_mode": "deterministic_seed_reference",
+            },
+            signal_check_status="SIGNAL_MATCHED_OFFLINE",
+            validation_outcome="RESILIENT_WITH_REVIEW_REQUIRED",
+            policy_candidate_readiness="READY_FOR_GOVERNANCE_REVIEW",
+            governance_handoff_readiness="POLICY_CANDIDATE_READY",
+            black_box_replay_reference="chaos_ref_black_box_prompt_injection",
+            riskdna_feedback_reference="chaos_ref_riskdna_prompt_injection",
+            evidence_source_posture="deterministic_evidence_reference_only",
+            execution_posture="OFFLINE_VALIDATION_ONLY",
+            boundary_statement=boundary,
+            soc2_mapping={
+                "security": [
+                    "forbidden tool blocked",
+                    "approval boundary preserved",
+                    "no autonomous execution",
+                ],
+                "processing_integrity": [
+                    "expected signal compared with observed evidence",
+                    "validation outcome recorded",
+                    "policy candidate readiness recorded",
+                ],
+                "availability": [
+                    "worker allocation avoided for blocked scenario",
+                    "offline validation does not affect production traffic",
+                ],
+            },
+        ),
+        OfflineResilienceValidationRecord(
+            validation_id="resilience_validation_rag_context_contamination",
+            scenario_id="chaos_scenario_rag_context_contamination",
+            simulation_plan_id="chaos_plan_rag_context_contamination",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            validation_name="RAG Context Contamination Offline Validation",
+            expected_resilience_signal="forbidden context removed and citation-backed grounding required",
+            observed_offline_evidence={
+                "rag_evaluation": "forbidden source boundary recorded",
+                "citation_check": "citation requirement present",
+                "source_boundary": "allowed and forbidden source lists defined",
+                "evidence_mode": "deterministic_seed_reference",
+            },
+            signal_check_status="SIGNAL_PARTIALLY_MATCHED_OFFLINE",
+            validation_outcome="RESILIENT_WITH_SOURCE_BOUNDARY_REVIEW",
+            policy_candidate_readiness="NEEDS_GOVERNANCE_REVIEW",
+            governance_handoff_readiness="SOURCE_BOUNDARY_REVIEW_REQUIRED",
+            black_box_replay_reference="reference_only_no_custody_bypass",
+            riskdna_feedback_reference="feedback_reference_only",
+            evidence_source_posture="deterministic_evidence_reference_only",
+            execution_posture="OFFLINE_VALIDATION_ONLY",
+            boundary_statement=boundary,
+            soc2_mapping={
+                "security": [
+                    "source boundary validation planned",
+                    "no production retrieval mutation",
+                ],
+                "processing_integrity": [
+                    "expected grounding signal checked",
+                    "citation requirement evidence recorded",
+                ],
+                "availability": [
+                    "offline validation avoids production RAG dependency impact",
+                ],
+                "confidentiality": [
+                    "forbidden source boundary recorded",
+                    "no customer data retrieval",
+                ],
+            },
+        ),
+        OfflineResilienceValidationRecord(
+            validation_id="resilience_validation_memory_cross_tenant_leakage",
+            scenario_id="chaos_scenario_memory_cross_tenant_leakage",
+            simulation_plan_id="chaos_plan_memory_cross_tenant_leakage",
+            tenant_id=TENANT_ID,
+            workspace_id=WORKSPACE_ID,
+            validation_name="Memory Cross-Tenant Leakage Offline Validation",
+            expected_resilience_signal="tenant boundary prevents cross-user or cross-workspace memory reuse",
+            observed_offline_evidence={
+                "tenant_boundary": "tenant-scoped records present",
+                "workspace_boundary": "workspace-scoped records present",
+                "rbac_boundary": "restricted action boundary present",
+                "evidence_mode": "deterministic_seed_reference",
+            },
+            signal_check_status="SIGNAL_MATCHED_OFFLINE",
+            validation_outcome="RESILIENT_WITH_PRIVACY_REVIEW_REQUIRED",
+            policy_candidate_readiness="READY_FOR_PRIVACY_REVIEW",
+            governance_handoff_readiness="MEMORY_ISOLATION_POLICY_CANDIDATE_READY",
+            black_box_replay_reference="reference_only_no_custody_bypass",
+            riskdna_feedback_reference="feedback_reference_only",
+            evidence_source_posture="deterministic_evidence_reference_only",
+            execution_posture="OFFLINE_VALIDATION_ONLY",
+            boundary_statement=boundary,
+            soc2_mapping={
+                "security": [
+                    "tenant boundary referenced",
+                    "RBAC boundary referenced",
+                ],
+                "processing_integrity": [
+                    "expected memory isolation signal checked",
+                    "validation result recorded",
+                ],
+                "availability": [
+                    "offline validation avoids runtime dependency impact",
+                ],
+                "confidentiality": [
+                    "cross-tenant leakage check remains non-production",
+                    "no real customer data processed",
+                ],
+                "privacy": [
+                    "privacy review required before any real memory evaluation",
+                ],
+            },
+        ),
+    ]
+
+    for validation in validations:
+        db.add(validation)
+
+    audit = AuditEventRecord(
+        audit_id="audit_phase_20_offline_resilience_validation_seed_1",
+        tenant_id=TENANT_ID,
+        workspace_id=WORKSPACE_ID,
+        actor="system_seed",
+        action="seed_offline_resilience_validation_evidence",
+        object_type="offline_resilience_validation",
+        object_id="phase_20_offline_resilience_validation_evidence",
+        event_metadata={
+            "phase": "20",
+            "status": "FOUNDATION_ADDED",
+            "execution_posture": "OFFLINE_VALIDATION_ONLY",
             "true_mode": "not_active",
             "production_authority": "not_granted",
             "live_autonomous_execution": "not_active",

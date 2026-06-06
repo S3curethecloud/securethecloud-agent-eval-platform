@@ -1105,3 +1105,12 @@ select {
     radial-gradient(circle at bottom right, rgba(255, 190, 40, 0.08), transparent 34%),
     rgba(30, 12, 36, 0.82);
 }
+
+
+.phase20Panel {
+  border-color: #00d4ff;
+  background:
+    radial-gradient(circle at top left, rgba(0, 212, 255, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(0, 255, 136, 0.08), transparent 34%),
+    rgba(4, 24, 34, 0.84);
+}

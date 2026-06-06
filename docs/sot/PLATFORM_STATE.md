@@ -108,3 +108,5 @@ TRUE_MODE remains inactive.
 - enterprise preview website doctrine-safe positioning
 
 - AI Chaos Harness planning surface
+
+- offline resilience validation evidence
