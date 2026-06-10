@@ -17,3 +17,6 @@ build/
 
 # Logs
 *.log
+
+# Local test database artifacts
+agent_eval_local.db
