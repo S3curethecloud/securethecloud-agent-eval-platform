@@ -550,7 +550,14 @@ def health():
         "status": "ok",
         "service": "securethecloud-agent-eval-platform",
         "lab_mode": True,
-        "phase": "8",
+        "current_phase": "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate",
+        "latest_completed_phase": "Phase 20 - Offline Resilience Validation Evidence",
+        "runtime_authority": False,
+        "production_authority": False,
+        "enforcement_authority": False,
+        "policy_mutation_authority": False,
+        "live_autonomous_execution": False,
+        "soc2_certification_claimed": False,
     }
 
 
