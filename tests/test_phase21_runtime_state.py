@@ -1,21 +1,22 @@
 import sys
 from pathlib import Path
 
-from fastapi.testclient import TestClient
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+
+from fastapi.testclient import TestClient
 
 from app.main import app
 
 
-client = TestClient(app)
+def get_json(path: str):
+    with TestClient(app) as client:
+        response = client.get(path)
+        assert response.status_code == 200
+        return response.json()
 
 
 def test_health_reports_phase21_runtime_boundary():
-    response = client.get("/health")
-    assert response.status_code == 200
-
-    payload = response.json()
+    payload = get_json("/health")
 
     assert payload["status"] == "ok"
     assert payload["lab_mode"] is True
@@ -30,10 +31,7 @@ def test_health_reports_phase21_runtime_boundary():
 
 
 def test_phase20_resilience_endpoint_preserves_offline_boundary():
-    response = client.get("/api/v1/ai-chaos/resilience-validations")
-    assert response.status_code == 200
-
-    payload = response.json()
+    payload = get_json("/api/v1/ai-chaos/resilience-validations")
 
     assert payload["phase"] == "20"
     assert payload["execution_posture"] == "OFFLINE_VALIDATION_ONLY"
@@ -44,10 +42,7 @@ def test_phase20_resilience_endpoint_preserves_offline_boundary():
 
 
 def test_persistence_status_remains_lab_safe_without_true_mode():
-    response = client.get("/api/v1/persistence/status")
-    assert response.status_code == 200
-
-    payload = response.json()
+    payload = get_json("/api/v1/persistence/status")
 
     assert payload["storage_mode"] == "persistent_database"
     assert payload["database_ready"] is True
