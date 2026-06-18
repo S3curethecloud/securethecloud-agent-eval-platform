@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 9 — Regression Detection |
+| Current phase | Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.9.1-regression-sot-hydration-fix |
+| Latest stable baseline | v0.21.0-runtime-state-reconciliation-api-smoke-evidence |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 10 — Agent Memory Evaluation
+Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
 
 Planned additions:
 
@@ -110,3 +110,37 @@ TRUE_MODE remains inactive.
 - AI Chaos Harness planning surface
 
 - offline resilience validation evidence
+
+## Phase 21 Runtime State Reconciliation Evidence
+
+Phase 21 reconciles runtime metadata and validation evidence with the completed Phase 20 runtime surface.
+
+Evidence recorded:
+
+- `/health` reports Phase 21 current phase.
+- `/health` reports Phase 20 - Offline Resilience Validation Evidence as the latest completed runtime surface.
+- Runtime smoke check passed using `./scripts/runtime_smoke_check.sh`.
+- Backend test suite passed: `10 passed, 2 warnings`.
+- `/api/dashboard` returned command-center metrics.
+- `/api/v1/persistence/status` confirmed persistent database mode.
+- `/api/v1/ai-chaos/resilience-validations` confirmed offline-only Phase 20 resilience validation evidence.
+- Frontend production build passed.
+- npm audit reported 0 vulnerabilities.
+- Phase 21 commits pushed to `main`: `f3545bf`, `1bce294`, `65b7756`.
+
+Boundary preserved:
+
+- runtime authority: false
+- production authority: false
+- enforcement authority: false
+- policy mutation authority: false
+- live autonomous execution: false
+- backend/API public exposure: false
+- token/session authority: false
+- SENTINEL bypass: false
+- Agent Black Box custody bypass: false
+- SOC 2 certification claimed: false
+
+Next planned phase:
+
+Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
