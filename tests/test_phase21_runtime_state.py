@@ -20,8 +20,9 @@ def test_health_reports_phase21_runtime_boundary():
 
     assert payload["status"] == "ok"
     assert payload["lab_mode"] is True
-    assert payload["current_phase"] == "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate"
-    assert payload["latest_completed_phase"] == "Phase 20 - Offline Resilience Validation Evidence"
+    assert payload["current_phase"] == "Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate"
+    assert payload["latest_completed_phase"] == "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate"
+    assert payload["latest_completed_runtime_surface"] == "Phase 20 - Offline Resilience Validation Evidence"
     assert payload["runtime_authority"] is False
     assert payload["production_authority"] is False
     assert payload["enforcement_authority"] is False

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
@@ -34,15 +35,8 @@ from app.seed import seed_persistent_evidence_store, seed_tenant_workspace_rbac_
 from pydantic import BaseModel
 
 
-app = FastAPI(
-    title="SecureTheCloud Agent Evaluation Platform API",
-    version="0.3.0",
-)
-
-
-
-@app.on_event("startup")
-def startup_persistent_evidence_store():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
     db = next(get_db())
     try:
@@ -56,6 +50,15 @@ def startup_persistent_evidence_store():
         seed_offline_resilience_validation_evidence(db)
     finally:
         db.close()
+
+    yield
+
+
+app = FastAPI(
+    title="SecureTheCloud Agent Evaluation Platform API",
+    version="0.22.0",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -550,8 +553,9 @@ def health():
         "status": "ok",
         "service": "securethecloud-agent-eval-platform",
         "lab_mode": True,
-        "current_phase": "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate",
-        "latest_completed_phase": "Phase 20 - Offline Resilience Validation Evidence",
+        "current_phase": "Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate",
+        "latest_completed_phase": "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate",
+        "latest_completed_runtime_surface": "Phase 20 - Offline Resilience Validation Evidence",
         "runtime_authority": False,
         "production_authority": False,
         "enforcement_authority": False,
