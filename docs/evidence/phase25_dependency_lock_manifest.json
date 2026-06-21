@@ -1,0 +1,26 @@
+{
+  "phase": "Phase 25 - CI Determinism / Dependency Pinning Hardening Gate",
+  "status": "implementation_in_progress",
+  "purpose": "Record deterministic dependency-input checks for backend CI without changing runtime behavior.",
+  "locked_files": [
+    {
+      "path": "backend/requirements.txt",
+      "sha256": "bfb6c387c75c1cfda2648b33ae099811e08ed5196be868c965312c4440656329"
+    },
+    {
+      "path": "backend/requirements-test.txt",
+      "sha256": "9f2b8d9e2be9231e2e1db0fe0defc161fe8061065d42c182e395a4e57cb70d23"
+    }
+  ],
+  "boundaries": {
+    "runtime_behavior_changed": false,
+    "backend_api_public_exposure": false,
+    "runtime_authority": false,
+    "enforcement_authority": false,
+    "production_authority": false,
+    "policy_mutation_authority": false,
+    "token_session_authority": false,
+    "live_autonomous_execution": false,
+    "soc2_certification_claimed": false
+  }
+}

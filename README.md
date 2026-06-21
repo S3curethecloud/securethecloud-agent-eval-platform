@@ -348,3 +348,24 @@ Runtime boundary preserved:
 - backend/API public exposure: false
 - token/session authority: false
 - SOC 2 certification claimed: false
+
+## Phase 25 CI Determinism Gate
+
+Phase 25 adds dependency determinism checks to the Runtime Readiness Gate.
+
+CI determinism coverage:
+
+- backend test dependencies are installed through `backend/requirements-test.txt`
+- `pytest` and `httpx` are pinned for CI test execution
+- dependency input files are recorded in `docs/evidence/phase25_dependency_lock_manifest.json`
+- CI verifies the dependency lock manifest before installing test dependencies
+
+Local verification:
+
+~~~bash
+python scripts/verify_dependency_locks.py
+pytest -q
+./scripts/runtime_smoke_check.sh
+~~~
+
+Phase 25 does not change runtime behavior, expose backend/API services, issue tokens or sessions, enable live autonomous execution, or introduce enforcement authority.

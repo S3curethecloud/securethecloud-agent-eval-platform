@@ -1,0 +1,6 @@
+# Phase 25 CI/backend test dependency pinning.
+# Runtime application dependencies remain sourced from backend/requirements.txt.
+-r requirements.txt
+
+pytest==9.0.3
+httpx==0.28.1
