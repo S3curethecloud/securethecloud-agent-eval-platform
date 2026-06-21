@@ -1,14 +1,14 @@
 # Agent Eval Platform Phase Tracker
 
-Status: Phase 24 Evidence Recorded
+Status: Phase 25 Evidence Recorded
 
 ## Current Phase
 
-Phase 24 - CI Run Evidence / Workflow Status Verification Gate
+Phase 25 - CI Determinism / Dependency Pinning Hardening Gate
 
 ## Latest Completed Phase
 
-Phase 24 - CI Run Evidence / Workflow Status Verification Gate
+Phase 25 - CI Determinism / Dependency Pinning Hardening Gate
 
 ## Latest Completed Runtime Surface
 
@@ -20,7 +20,7 @@ Repository: S3curethecloud/securethecloud-agent-eval-platform
 
 Branch: main
 
-Phase 24 verified CI evidence source commit: 5babd86
+Phase 25 verified CI evidence source commit: 5babd86
 
 ## Canonical Authority
 
@@ -64,6 +64,7 @@ The repository currently demonstrates:
 - Phase 22 FastAPI lifespan startup contract
 - Phase 23 runtime-readiness CI gate
 - Phase 24 CI run evidence verification
+- Phase 25 dependency determinism CI gate
 
 ## Current Boundaries
 
@@ -148,6 +149,35 @@ Phase 24 confirms that the Phase 23 runtime-readiness CI gate completed successf
 
 No runtime behavior, backend/API exposure, production authority, enforcement authority, token/session authority, policy mutation authority, or live autonomous execution was introduced.
 
+
+## Phase 25 Evidence
+
+CI evidence source:
+
+- Commit verified: `5babd86afc45b1758120f362e6f51fdcd9033ba3`
+- Workflow verified: `Runtime Readiness Gate`
+- Run ID: `27894834754`
+- Run status: `completed`
+- Run conclusion: `success`
+- Run URL: `https://github.com/S3curethecloud/securethecloud-agent-eval-platform/actions/runs/27894834754`
+
+Implementation evidence:
+
+- `backend/requirements-test.txt` added.
+- `docs/evidence/phase25_dependency_lock_manifest.json` added.
+- `scripts/verify_dependency_locks.py` added.
+- Runtime Readiness Gate updated to verify dependency lock manifest.
+- Runtime Readiness Gate updated to install test dependencies from `backend/requirements-test.txt`.
+
+Verified jobs:
+
+- `Smoke script static validation`: `success`
+- `Backend pytest gate`: `success`
+
+Phase 25 confirms dependency determinism hardening for CI.
+
+No runtime behavior, backend/API exposure, production authority, enforcement authority, token/session authority, policy mutation authority, or live autonomous execution was introduced.
+
 ## Custodian Rule
 
 Adaptive immunity is allowed.
@@ -160,4 +190,4 @@ Custodian approval is required before any Aegis/OPA policy update enters release
 
 ## Next Planned Phase
 
-Phase 25 - CI Determinism / Dependency Pinning Hardening Gate
+Phase 26 - CI Artifact Retention / Evidence Snapshot Gate
