@@ -12,8 +12,8 @@ curl -fsS "${BASE_URL}/api/v1/persistence/status" | python -m json.tool >/tmp/ag
 curl -fsS "${BASE_URL}/api/v1/ai-chaos/resilience-validations" | python -m json.tool >/tmp/agent_eval_resilience.json
 
 grep -q '"status": "ok"' /tmp/agent_eval_health.json
-grep -q '"current_phase": "Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate"' /tmp/agent_eval_health.json
-grep -q '"latest_completed_phase": "Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate"' /tmp/agent_eval_health.json
+grep -q '"current_phase": "Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate"' /tmp/agent_eval_health.json
+grep -q '"latest_completed_phase": "Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate"' /tmp/agent_eval_health.json
 grep -q '"latest_completed_runtime_surface": "Phase 20 - Offline Resilience Validation Evidence"' /tmp/agent_eval_health.json
 grep -q '"runtime_authority": false' /tmp/agent_eval_health.json
 grep -q '"production_authority": false' /tmp/agent_eval_health.json

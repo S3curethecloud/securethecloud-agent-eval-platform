@@ -317,3 +317,34 @@ See:
 - `docs/portfolio/AGENT_EVALUATION_PLATFORM_PORTFOLIO_FIT_BASELINE.md`
 - `docs/doctrine/CANONICAL_DOCTRINE_ADOPTION.md`
 - `docs/doctrine/AGENT_EVAL_PLATFORM_PHASE_2_AI_CHAOS_HARNESS_BOUNDARY.md`
+
+## Phase 23 Runtime Readiness Gate
+
+Phase 23 adds a lightweight CI readiness gate while preserving the local/manual Docker runtime smoke posture.
+
+CI coverage:
+
+- backend pytest gate
+- smoke script shell syntax validation
+- smoke script boundary-string validation
+
+Local/manual runtime smoke coverage:
+
+~~~bash
+docker compose up --build -d
+./scripts/runtime_smoke_check.sh
+pytest -q
+~~~
+
+The Docker runtime smoke check remains local/manual in Phase 23. CI does not expose backend/API services, does not activate production authority, does not issue tokens or sessions, does not enable live autonomous execution, and does not introduce enforcement authority.
+
+Runtime boundary preserved:
+
+- runtime authority: false
+- production authority: false
+- enforcement authority: false
+- policy mutation authority: false
+- live autonomous execution: false
+- backend/API public exposure: false
+- token/session authority: false
+- SOC 2 certification claimed: false
