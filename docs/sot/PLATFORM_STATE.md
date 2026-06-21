@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate |
+| Current phase | Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.22.0-fastapi-lifespan-startup-contract |
+| Latest stable baseline | v0.23.0-runtime-readiness-smoke-check-ci-gate |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate
+Phase 24 - CI Run Evidence / Workflow Status Verification Gate
 
 Planned additions:
 
@@ -183,3 +183,51 @@ Boundary preserved:
 Next planned phase:
 
 Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate
+
+## Phase 23 Runtime Readiness Orchestration Evidence
+
+Phase 23 adds a lightweight CI readiness gate while preserving the local/manual Docker runtime smoke posture.
+
+Evidence recorded:
+
+- GitHub Actions workflow added at `.github/workflows/runtime-readiness.yml`.
+- Backend pytest CI gate added.
+- Smoke script shell syntax validation added.
+- Smoke script boundary-string validation added.
+- README documents the local/manual runtime smoke gate.
+- `/health` reports Phase 23 current phase.
+- `/health` reports Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate as the latest completed phase.
+- `/health` reports Phase 20 - Offline Resilience Validation Evidence as the latest completed runtime surface.
+- Local runtime smoke check passed using `./scripts/runtime_smoke_check.sh`.
+- Backend test suite passed: `10 passed`.
+- Docker Compose backend image built successfully.
+- Docker Compose frontend image built successfully.
+- PostgreSQL container reached healthy state.
+- Backend container started successfully.
+- Frontend container started successfully.
+- Phase 23 implementation commit pushed to `main`: `f4aa5e6`.
+
+CI posture:
+
+- CI runs backend pytest.
+- CI validates smoke script shell syntax.
+- CI validates smoke script boundary strings.
+- CI does not run Docker Compose runtime smoke in Phase 23.
+- CI does not expose backend/API services.
+
+Boundary preserved:
+
+- runtime authority: false
+- production authority: false
+- enforcement authority: false
+- policy mutation authority: false
+- live autonomous execution: false
+- backend/API public exposure: false
+- token/session authority: false
+- SENTINEL bypass: false
+- Agent Black Box custody bypass: false
+- SOC 2 certification claimed: false
+
+Next planned phase:
+
+Phase 24 - CI Run Evidence / Workflow Status Verification Gate
