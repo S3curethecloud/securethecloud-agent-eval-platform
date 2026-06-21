@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate |
+| Current phase | Phase 24 - CI Run Evidence / Workflow Status Verification Gate |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.23.0-runtime-readiness-smoke-check-ci-gate |
+| Latest stable baseline | v0.24.0-ci-run-evidence-workflow-status-verification |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 24 - CI Run Evidence / Workflow Status Verification Gate
+Phase 25 - CI Determinism / Dependency Pinning Hardening Gate
 
 Planned additions:
 
@@ -231,3 +231,46 @@ Boundary preserved:
 Next planned phase:
 
 Phase 24 - CI Run Evidence / Workflow Status Verification Gate
+
+## Phase 24 CI Run Evidence
+
+Phase 24 verifies the actual GitHub Actions workflow result for the Phase 23 runtime-readiness CI gate.
+
+Evidence recorded:
+
+- Verified commit: `5babd86afc45b1758120f362e6f51fdcd9033ba3`
+- Verified workflow: `Runtime Readiness Gate`
+- GitHub Actions run ID: `27894834754`
+- Run status: `completed`
+- Run conclusion: `success`
+- Run URL: `https://github.com/S3curethecloud/securethecloud-agent-eval-platform/actions/runs/27894834754`
+
+Verified jobs:
+
+- `Smoke script static validation`: `success`
+- `Backend pytest gate`: `success`
+
+CI verification posture:
+
+- Backend pytest CI gate verified.
+- Smoke script syntax validation verified.
+- Smoke script boundary-string validation verified.
+- Docker runtime smoke remains local/manual.
+- CI does not expose backend/API services.
+
+Boundary preserved:
+
+- runtime authority: false
+- production authority: false
+- enforcement authority: false
+- policy mutation authority: false
+- live autonomous execution: false
+- backend/API public exposure: false
+- token/session authority: false
+- SENTINEL bypass: false
+- Agent Black Box custody bypass: false
+- SOC 2 certification claimed: false
+
+Next planned phase:
+
+Phase 25 - CI Determinism / Dependency Pinning Hardening Gate
