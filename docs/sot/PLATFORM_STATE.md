@@ -8,9 +8,9 @@ SecureTheCloud Agent Evaluation Platform
 
 | Field | Value |
 |---|---|
-| Current phase | Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate |
+| Current phase | Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate |
 | Current posture | Lab-safe evaluation platform surface |
-| Latest stable baseline | v0.21.0-runtime-state-reconciliation-api-smoke-evidence |
+| Latest stable baseline | v0.22.0-fastapi-lifespan-startup-contract |
 | Doctrine alignment | Required |
 | SOC 2 posture | Readiness evidence only |
 | Production authority | Not granted |
@@ -73,7 +73,7 @@ The current platform demonstrates:
 
 ## Next Planned Phase
 
-Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
+Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate
 
 Planned additions:
 
@@ -144,3 +144,42 @@ Boundary preserved:
 Next planned phase:
 
 Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
+
+## Phase 22 FastAPI Lifespan Migration Evidence
+
+Phase 22 migrates backend startup seeding from FastAPI's deprecated `@app.on_event("startup")` hook to the supported FastAPI lifespan contract.
+
+Evidence recorded:
+
+- Startup seeding now uses FastAPI lifespan.
+- Deprecated `@app.on_event("startup")` usage was removed.
+- Existing seed order was preserved.
+- `/health` reports Phase 22 current phase.
+- `/health` reports Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate as the latest completed phase.
+- `/health` reports Phase 20 - Offline Resilience Validation Evidence as the latest completed runtime surface.
+- Runtime smoke check passed using `./scripts/runtime_smoke_check.sh`.
+- Backend test suite passed: `10 passed`.
+- Docker Compose backend image built successfully.
+- Docker Compose frontend image built successfully.
+- PostgreSQL container reached healthy state.
+- Backend container started successfully.
+- Frontend container started successfully.
+- FastAPI startup deprecation warnings were removed.
+- Phase 22 implementation commit pushed to `main`: `7e8d91e`.
+
+Boundary preserved:
+
+- runtime authority: false
+- production authority: false
+- enforcement authority: false
+- policy mutation authority: false
+- live autonomous execution: false
+- backend/API public exposure: false
+- token/session authority: false
+- SENTINEL bypass: false
+- Agent Black Box custody bypass: false
+- SOC 2 certification claimed: false
+
+Next planned phase:
+
+Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate

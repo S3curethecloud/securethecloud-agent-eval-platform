@@ -1,10 +1,14 @@
 # Agent Eval Platform Phase Tracker
 
-Status: Phase 21 Evidence Recorded
+Status: Phase 22 Evidence Recorded
 
 ## Current Phase
 
-Phase 21 - Runtime State Reconciliation / API Smoke Evidence Gate
+Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
+
+## Latest Completed Phase
+
+Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
 
 ## Latest Completed Runtime Surface
 
@@ -16,7 +20,7 @@ Repository: S3curethecloud/securethecloud-agent-eval-platform
 
 Branch: main
 
-Latest pushed Phase 21 commit: 65b7756
+Latest pushed Phase 22 implementation commit: 7e8d91e
 
 ## Canonical Authority
 
@@ -57,6 +61,7 @@ The repository currently demonstrates:
 - AI Chaos Harness planning surface
 - Offline Resilience Validation evidence
 - Phase 21 runtime smoke and boundary validation
+- Phase 22 FastAPI lifespan startup contract
 
 ## Current Boundaries
 
@@ -86,28 +91,36 @@ Governance hold released: false
 
 SOC 2 certification claimed: false
 
-## Phase 21 Evidence
+## Phase 22 Evidence
+
+Implementation evidence:
+
+- FastAPI startup seeding migrated from deprecated `@app.on_event("startup")` to FastAPI lifespan.
+- Existing seed order preserved.
+- Health endpoint reports Phase 22.
+- Phase 21 remains recorded as latest completed phase in runtime health metadata.
+- Phase 20 remains recorded as latest completed runtime surface.
+- No runtime authority introduced.
+- No enforcement authority introduced.
+- No production authority introduced.
+- No policy mutation authority introduced.
+- No live autonomous execution introduced.
 
 Runtime evidence:
 
-- Backend and frontend Docker images built successfully.
+- Docker Compose backend image built successfully.
+- Docker Compose frontend image built successfully.
 - PostgreSQL container healthy.
 - Backend container started successfully.
+- Frontend container started successfully.
 - `/health` returned HTTP 200.
-- `/health` now reports Phase 21 current phase.
-- `/health` reports Phase 20 as latest completed runtime surface.
-- `/api/dashboard` returned command-center metrics.
-- `/api/v1/persistence/status` confirmed persistent database mode.
-- `/api/v1/ai-chaos/resilience-validations` confirmed Phase 20 offline-only validation evidence.
 - `./scripts/runtime_smoke_check.sh` passed.
-- `pytest -q` passed with 10 passed and 2 warnings.
-- Local SQLite test database artifact is ignored.
+- `pytest -q` passed with 10 passed.
+- FastAPI startup deprecation warnings were removed.
 
-Phase 21 commits:
+Phase 22 implementation commit:
 
-- `f3545bf` - Reconcile health endpoint with Phase 21 runtime state
-- `1bce294` - Add Phase 21 runtime smoke and boundary checks
-- `65b7756` - Ignore local Agent Eval test database
+- `7e8d91e` - Migrate startup seeding to FastAPI lifespan
 
 ## Custodian Rule
 
@@ -121,4 +134,4 @@ Custodian approval is required before any Aegis/OPA policy update enters release
 
 ## Next Planned Phase
 
-Phase 22 - FastAPI Lifespan Migration / Startup Contract Hardening Gate
+Phase 23 - Runtime Readiness Orchestration / Smoke Check CI Gate
